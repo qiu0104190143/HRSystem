@@ -1,0 +1,175 @@
+{% extends "base.html" %}
+{% block title %}{{ job.title }} - HR招聘管理系统{% endblock %}
+
+{% block content %}
+<div class="mb-4">
+    <a href="{{ url_for('jobs.list_view') }}" class="btn btn-sm btn-outline-secondary mb-3">
+        <i class="bi bi-arrow-left me-1"></i>返回列表
+    </a>
+    <div class="d-flex justify-content-between align-items-center">
+        <div>
+            <h2 class="fw-bold mb-1">{{ job.title }}</h2>
+            <p class="text-muted mb-0">
+                {% if job.department %}<span class="me-3"><i class="bi bi-building me-1"></i>{{ job.department }}</span>{% endif %}
+                <span class="badge bg-{{ 'success' if job.status == '招聘中' else 'secondary' }} fs-6">{{ job.status }}</span>
+            </p>
+        </div>
+        <div class="btn-group">
+            <form method="POST" action="{{ url_for('jobs.toggle_status', job_id=job.id) }}" class="d-inline">
+                <button type="submit" class="btn btn-{{ 'secondary' if job.status == '招聘中' else 'success' }}">
+                    <i class="bi bi-{{ 'pause-circle' if job.status == '招聘中' else 'play-circle' }} me-1"></i>
+                    {{ '关闭招聘' if job.status == '招聘中' else '重新开启' }}
+                </button>
+            </form>
+            <a href="{{ url_for('jobs.edit_view', job_id=job.id) }}" class="btn btn-warning">
+                <i class="bi bi-pencil me-1"></i>编辑
+            </a>
+            <button type="button" class="btn btn-danger" onclick="confirmDelete('{{ url_for('jobs.delete_view', job_id=job.id) }}', '{{ job.title }}')">
+                <i class="bi bi-trash me-1"></i>删除
+            </button>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4">
+    <!-- 职位详情 -->
+    <div class="col-lg-8">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white border-bottom">
+                <h5 class="mb-0 fw-bold">📋 职位详情</h5>
+            </div>
+            <div class="card-body">
+                <div class="row g-3 mb-4">
+                    <div class="col-sm-4">
+                        <label class="text-muted small">薪资范围</label>
+                        <p class="text-danger fw-bold fs-5">
+                            {% if job.salary_min or job.salary_max %}
+                            {{ job.salary_min }}-{{ job.salary_max }}K/月
+                            {% else %}
+                            面议
+                            {% endif %}
+                        </p>
+                    </div>
+                    <div class="col-sm-4">
+                        <label class="text-muted small">学历要求</label>
+                        <p>{% if job.education_required %}<span class="badge bg-info fs-6">{{ job.education_required }}</span>{% else %}不限{% endif %}</p>
+                    </div>
+                    <div class="col-sm-4">
+                        <label class="text-muted small">经验要求</label>
+                        <p>{% if job.experience_required %}{{ job.experience_required }} 年以上{% else %}不限{% endif %}</p>
+                    </div>
+                    {% if job.age_min or job.age_max %}
+                    <div class="col-sm-4">
+                        <label class="text-muted small">年龄范围</label>
+                        <p>{{ job.age_min }} - {{ job.age_max }} 岁</p>
+                    </div>
+                    {% endif %}
+                    <div class="col-sm-4">
+                        <label class="text-muted small">发布时间</label>
+                        <p>{{ job.created_at[:10] if job.created_at else '-' }}</p>
+                    </div>
+                </div>
+
+                {% if job.skills_required %}
+                <div class="mb-4">
+                    <label class="text-muted small">技能要求</label>
+                    <div>
+                        {% for skill in job.skills_required.replace('，', ',').replace(' ', ',').split(',') %}
+                        {% if skill.strip() %}
+                        <span class="badge bg-primary me-1 mb-1 fs-6">{{ skill.strip() }}</span>
+                        {% endif %}
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+
+                {% if job.description %}
+                <div class="mb-4">
+                    <label class="text-muted small fw-bold">📝 岗位职责</label>
+                    <div class="bg-light p-3 rounded">{{ job.description | replace('\n', '<br>') | safe }}</div>
+                </div>
+                {% endif %}
+
+                {% if job.requirements %}
+                <div class="mb-4">
+                    <label class="text-muted small fw-bold">✅ 任职要求</label>
+                    <div class="bg-light p-3 rounded">{{ job.requirements | replace('\n', '<br>') | safe }}</div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- 匹配候选人侧边栏 -->
+    <div class="col-lg-4">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white border-bottom d-flex justify-content-between align-items-center">
+                <h5 class="mb-0 fw-bold">🎯 最佳匹配候选人</h5>
+                <a href="{{ url_for('search.search_view') }}" class="btn btn-sm btn-outline-primary">更多搜索</a>
+            </div>
+            <div class="card-body p-0">
+                {% if match_results %}
+                {% for result in match_results %}
+                <div class="border-bottom p-3 candidate-match-card">
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <div>
+                            <a href="{{ url_for('resumes.detail_view', resume_id=result.resume.id) }}" class="fw-bold text-decoration-none">
+                                {{ result.resume.name or '未命名' }}
+                            </a>
+                            <span class="text-muted small ms-2">{{ result.resume.education or '' }}</span>
+                        </div>
+                    </div>
+                    <!-- 匹配度进度条 -->
+                    <div class="mb-2">
+                        <div class="d-flex justify-content-between small mb-1">
+                            <span>匹配度</span>
+                            <span class="fw-bold text-{{ 'success' if result.score_level == 'high' else ('warning' if result.score_level == 'medium' else 'danger') }}">
+                                {{ '%.0f'|format(result.score) }}%
+                            </span>
+                        </div>
+                        <div class="progress" style="height: 8px;">
+                            <div class="progress-bar bg-{{ 'success' if result.score_level == 'high' else ('warning' if result.score_level == 'medium' else 'danger') }}"
+                                 style="width: {{ result.score }}%"></div>
+                        </div>
+                    </div>
+                    <!-- 匹配原因 -->
+                    {% if result.reasons %}
+                    <div class="small">
+                        {% for reason in result.reasons %}
+                        <div class="mb-1">{{ reason.icon }} {{ reason.text }}</div>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                    <div class="mt-2">
+                        <span class="badge bg-{{ 'success' if result.score_level == 'high' else ('warning' if result.score_level == 'medium' else 'danger') }}">
+                            {{ '强烈推荐' if result.score_level == 'high' else ('可以考虑' if result.score_level == 'medium' else '匹配较低') }}
+                        </span>
+                    </div>
+                </div>
+                {% endfor %}
+                {% else %}
+                <div class="text-center py-4 text-muted">
+                    <i class="bi bi-people fs-1"></i>
+                    <p class="mt-2">暂无匹配的候选人</p>
+                    <small>请先<a href="{{ url_for('resumes.upload_view') }}">上传简历</a></small>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<form id="deleteForm" method="POST" style="display: none;"></form>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function confirmDelete(url, name) {
+    if (confirm('确定要删除职位 "' + name + '" 吗？此操作不可恢复。')) {
+        var form = document.getElementById('deleteForm');
+        form.action = url;
+        form.submit();
+    }
+}
+</script>
+{% endblock %}

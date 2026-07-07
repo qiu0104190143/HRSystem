@@ -1,0 +1,120 @@
+{% extends "base.html" %}
+{% block title %}简历管理 - HR招聘管理系统{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h2 class="fw-bold mb-0"><i class="bi bi-file-earmark-person me-2"></i>简历管理</h2>
+        <p class="text-muted mb-0">共 {{ total }} 份简历</p>
+    </div>
+    <a href="{{ url_for('resumes.upload_view') }}" class="btn btn-primary">
+        <i class="bi bi-upload me-1"></i>上传简历
+    </a>
+</div>
+
+{% if resumes %}
+<div class="table-responsive">
+    <table class="table table-hover align-middle shadow-sm rounded">
+        <thead class="table-light">
+            <tr>
+                <th>姓名</th>
+                <th>性别</th>
+                <th>年龄</th>
+                <th>学历</th>
+                <th>工作经验</th>
+                <th>技能</th>
+                <th>上传时间</th>
+                <th>操作</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for resume in resumes %}
+            <tr>
+                <td>
+                    <a href="{{ url_for('resumes.detail_view', resume_id=resume.id) }}" class="fw-bold text-decoration-none">
+                        {{ resume.name or '未命名' }}
+                    </a>
+                </td>
+                <td>{{ resume.gender or '-' }}</td>
+                <td>{{ resume.age if resume.age else '-' }}</td>
+                <td>
+                    {% if resume.education %}
+                    <span class="badge bg-info">{{ resume.education }}</span>
+                    {% else %}
+                    -
+                    {% endif %}
+                </td>
+                <td>{{ (resume.experience_years|string + '年') if resume.experience_years else '-' }}</td>
+                <td>
+                    {% if resume.skills %}
+                    <small class="text-muted">{{ resume.skills[:50] }}{% if resume.skills|length > 50 %}...{% endif %}</small>
+                    {% else %}
+                    -
+                    {% endif %}
+                </td>
+                <td><small class="text-muted">{{ resume.created_at[:10] if resume.created_at else '' }}</small></td>
+                <td>
+                    <div class="btn-group btn-group-sm">
+                        <a href="{{ url_for('resumes.detail_view', resume_id=resume.id) }}" class="btn btn-outline-primary" title="查看">
+                            <i class="bi bi-eye"></i>
+                        </a>
+                        <a href="{{ url_for('resumes.edit_view', resume_id=resume.id) }}" class="btn btn-outline-warning" title="编辑">
+                            <i class="bi bi-pencil"></i>
+                        </a>
+                        <button type="button" class="btn btn-outline-danger" title="删除"
+                                onclick="confirmDelete('{{ url_for('resumes.delete_view', resume_id=resume.id) }}', '{{ resume.name or '未命名' }}')">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<!-- 分页 -->
+{% if total_pages > 1 %}
+<nav class="d-flex justify-content-center mt-4">
+    <ul class="pagination shadow-sm">
+        <li class="page-item {{ 'disabled' if page <= 1 }}">
+            <a class="page-link" href="?page={{ page - 1 }}">上一页</a>
+        </li>
+        {% for p in range(1, total_pages + 1) %}
+        <li class="page-item {{ 'active' if p == page }}">
+            <a class="page-link" href="?page={{ p }}">{{ p }}</a>
+        </li>
+        {% endfor %}
+        <li class="page-item {{ 'disabled' if page >= total_pages }}">
+            <a class="page-link" href="?page={{ page + 1 }}">下一页</a>
+        </li>
+    </ul>
+</nav>
+{% endif %}
+
+{% else %}
+<div class="text-center py-5">
+    <i class="bi bi-inbox fs-1 text-muted"></i>
+    <h4 class="text-muted mt-3">暂无简历</h4>
+    <p class="text-muted">点击上传简历开始使用</p>
+    <a href="{{ url_for('resumes.upload_view') }}" class="btn btn-primary btn-lg">
+        <i class="bi bi-upload me-1"></i>上传第一份简历
+    </a>
+</div>
+{% endif %}
+
+<!-- 删除确认表单 -->
+<form id="deleteForm" method="POST" style="display: none;"></form>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function confirmDelete(url, name) {
+    if (confirm('确定要删除简历 "' + name + '" 吗？此操作不可恢复。')) {
+        var form = document.getElementById('deleteForm');
+        form.action = url;
+        form.submit();
+    }
+}
+</script>
+{% endblock %}

@@ -1,0 +1,109 @@
+{% extends "base.html" %}
+{% block title %}职位管理 - HR招聘管理系统{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h2 class="fw-bold mb-0"><i class="bi bi-briefcase me-2"></i>职位管理</h2>
+        <p class="text-muted mb-0">共 {{ total }} 个职位</p>
+    </div>
+    <a href="{{ url_for('jobs.create_view') }}" class="btn btn-success">
+        <i class="bi bi-plus-circle me-1"></i>发布职位
+    </a>
+</div>
+
+{% if jobs %}
+<div class="row g-3">
+    {% for job in jobs %}
+    <div class="col-md-6 col-lg-4">
+        <div class="card border-0 shadow-sm h-100 job-card">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-start mb-2">
+                    <h5 class="card-title mb-0">
+                        <a href="{{ url_for('jobs.detail_view', job_id=job.id) }}" class="text-decoration-none text-dark fw-bold">
+                            {{ job.title }}
+                        </a>
+                    </h5>
+                    <span class="badge bg-{{ 'success' if job.status == '招聘中' else 'secondary' }}">{{ job.status }}</span>
+                </div>
+                {% if job.department %}
+                <p class="text-muted small mb-2"><i class="bi bi-building me-1"></i>{{ job.department }}</p>
+                {% endif %}
+                {% if job.salary_min or job.salary_max %}
+                <p class="text-danger fw-bold mb-2">
+                    <i class="bi bi-cash me-1"></i>{{ job.salary_min }}-{{ job.salary_max }}K
+                </p>
+                {% endif %}
+                <div class="mb-3">
+                    {% if job.education_required %}
+                    <span class="badge bg-info me-1">{{ job.education_required }}</span>
+                    {% endif %}
+                    {% if job.experience_required %}
+                    <span class="badge bg-warning text-dark me-1">{{ job.experience_required }}年经验</span>
+                    {% endif %}
+                </div>
+                <div class="d-flex justify-content-between align-items-center">
+                    <small class="text-muted">{{ job.created_at[:10] if job.created_at else '' }}</small>
+                    <div class="btn-group btn-group-sm">
+                        <a href="{{ url_for('jobs.detail_view', job_id=job.id) }}" class="btn btn-outline-primary">
+                            <i class="bi bi-eye"></i>
+                        </a>
+                        <a href="{{ url_for('jobs.edit_view', job_id=job.id) }}" class="btn btn-outline-warning">
+                            <i class="bi bi-pencil"></i>
+                        </a>
+                        <button type="button" class="btn btn-outline-danger"
+                                onclick="confirmDelete('{{ url_for('jobs.delete_view', job_id=job.id) }}', '{{ job.title }}')">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- 分页 -->
+{% if total_pages > 1 %}
+<nav class="d-flex justify-content-center mt-4">
+    <ul class="pagination shadow-sm">
+        <li class="page-item {{ 'disabled' if page <= 1 }}">
+            <a class="page-link" href="?page={{ page - 1 }}">上一页</a>
+        </li>
+        {% for p in range(1, total_pages + 1) %}
+        <li class="page-item {{ 'active' if p == page }}">
+            <a class="page-link" href="?page={{ p }}">{{ p }}</a>
+        </li>
+        {% endfor %}
+        <li class="page-item {{ 'disabled' if page >= total_pages }}">
+            <a class="page-link" href="?page={{ page + 1 }}">下一页</a>
+        </li>
+    </ul>
+</nav>
+{% endif %}
+
+{% else %}
+<div class="text-center py-5">
+    <i class="bi bi-briefcase fs-1 text-muted"></i>
+    <h4 class="text-muted mt-3">暂无职位</h4>
+    <p class="text-muted">点击发布职位开始使用</p>
+    <a href="{{ url_for('jobs.create_view') }}" class="btn btn-success btn-lg">
+        <i class="bi bi-plus-circle me-1"></i>发布第一个职位
+    </a>
+</div>
+{% endif %}
+
+<form id="deleteForm" method="POST" style="display: none;"></form>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function confirmDelete(url, name) {
+    if (confirm('确定要删除职位 "' + name + '" 吗？此操作不可恢复。')) {
+        var form = document.getElementById('deleteForm');
+        form.action = url;
+        form.submit();
+    }
+}
+</script>
+{% endblock %}

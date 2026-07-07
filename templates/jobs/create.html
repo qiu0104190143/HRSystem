@@ -1,0 +1,125 @@
+{% extends "base.html" %}
+{% block title %}{{ '编辑职位' if job and job.id else '发布职位' }} - HR招聘管理系统{% endblock %}
+
+{% block content %}
+<div class="mb-4">
+    {% if job and job.id %}
+    <a href="{{ url_for('jobs.detail_view', job_id=job.id) }}" class="btn btn-sm btn-outline-secondary mb-3">
+        <i class="bi bi-arrow-left me-1"></i>返回详情
+    </a>
+    <h2 class="fw-bold"><i class="bi bi-pencil me-2"></i>编辑职位</h2>
+    {% else %}
+    <h2 class="fw-bold"><i class="bi bi-plus-circle me-2"></i>发布新职位</h2>
+    <p class="text-muted">填写职位信息并发布</p>
+    {% endif %}
+</div>
+
+<div class="row">
+    <div class="col-lg-8">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body">
+                <form method="POST">
+                    <div class="row g-3">
+                        <div class="col-sm-8">
+                            <label class="form-label">职位名称 <span class="text-danger">*</span></label>
+                            <input type="text" name="title" class="form-control form-control-lg" value="{{ job.title if job else '' }}" placeholder="例：高级Python开发工程师" required>
+                        </div>
+                        <div class="col-sm-4">
+                            <label class="form-label">部门</label>
+                            <input type="text" name="department" class="form-control form-control-lg" value="{{ job.department if job else '' }}" placeholder="例：技术部">
+                        </div>
+                        <div class="col-sm-6">
+                            <label class="form-label">最低薪资（K/月）</label>
+                            <input type="number" name="salary_min" class="form-control" value="{{ job.salary_min if job and job.salary_min else '' }}" placeholder="例：15" min="0">
+                        </div>
+                        <div class="col-sm-6">
+                            <label class="form-label">最高薪资（K/月）</label>
+                            <input type="number" name="salary_max" class="form-control" value="{{ job.salary_max if job and job.salary_max else '' }}" placeholder="例：25" min="0">
+                        </div>
+                        <div class="col-sm-4">
+                            <label class="form-label">学历要求</label>
+                            <select name="education_required" class="form-select">
+                                <option value="">不限</option>
+                                {% for edu in ['高中', '中专', '大专', '本科', '硕士', '博士'] %}
+                                <option value="{{ edu }}" {{ 'selected' if job and job.education_required == edu }}>{{ edu }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-sm-4">
+                            <label class="form-label">经验要求（年）</label>
+                            <input type="number" name="experience_required" class="form-control" value="{{ job.experience_required if job and job.experience_required else '' }}" placeholder="例：3" min="0">
+                        </div>
+                        <div class="col-sm-2">
+                            <label class="form-label">年龄下限</label>
+                            <input type="number" name="age_min" class="form-control" value="{{ job.age_min if job and job.age_min else '' }}" placeholder="25" min="18">
+                        </div>
+                        <div class="col-sm-2">
+                            <label class="form-label">年龄上限</label>
+                            <input type="number" name="age_max" class="form-control" value="{{ job.age_max if job and job.age_max else '' }}" placeholder="40" min="18">
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label">技能要求</label>
+                            <input type="text" name="skills_required" class="form-control" value="{{ job.skills_required if job else '' }}" placeholder="例：Python，Java，MySQL，Docker（用逗号分隔）">
+                            <small class="text-muted">用逗号、中文逗号或空格分隔多个技能</small>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label">职位描述/岗位职责</label>
+                            <textarea name="description" class="form-control" rows="5" placeholder="描述该岗位的主要工作内容和职责">{{ job.description if job else '' }}</textarea>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label">任职要求</label>
+                            <textarea name="requirements" class="form-control" rows="5" placeholder="详细列出应聘者需要具备的条件">{{ job.requirements if job else '' }}</textarea>
+                        </div>
+                        {% if job and job.id %}
+                        <div class="col-sm-6">
+                            <label class="form-label">状态</label>
+                            <select name="status" class="form-select">
+                                <option value="招聘中" {{ 'selected' if job.status == '招聘中' }}>招聘中</option>
+                                <option value="已关闭" {{ 'selected' if job.status == '已关闭' }}>已关闭</option>
+                            </select>
+                        </div>
+                        {% endif %}
+                    </div>
+                    <div class="mt-4 d-flex gap-2">
+                        <button type="submit" class="btn btn-success btn-lg">
+                            <i class="bi bi-check-circle me-1"></i>{{ '保存修改' if job and job.id else '发布职位' }}
+                        </button>
+                        {% if job and job.id %}
+                        <a href="{{ url_for('jobs.detail_view', job_id=job.id) }}" class="btn btn-outline-secondary btn-lg">取消</a>
+                        {% else %}
+                        <a href="{{ url_for('jobs.list_view') }}" class="btn btn-outline-secondary btn-lg">取消</a>
+                        {% endif %}
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-4">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white border-bottom">
+                <h5 class="mb-0 fw-bold">💡 填写提示</h5>
+            </div>
+            <div class="card-body">
+                <ul class="list-unstyled mb-0">
+                    <li class="mb-3">
+                        <i class="bi bi-1-circle text-primary me-2"></i>
+                        <strong>职位名称</strong>要清晰明确，方便求职者理解
+                    </li>
+                    <li class="mb-3">
+                        <i class="bi bi-2-circle text-primary me-2"></i>
+                        <strong>技能要求</strong>越详细越好，系统会根据技能匹配候选人
+                    </li>
+                    <li class="mb-3">
+                        <i class="bi bi-3-circle text-primary me-2"></i>
+                        <strong>职位描述</strong>写得越详细，智能匹配越准确
+                    </li>
+                    <li>
+                        <i class="bi bi-4-circle text-primary me-2"></i>
+                        <strong>年龄和学历</strong>设为"不限"可以扩大候选人范围
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

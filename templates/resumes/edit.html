@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+{% block title %}编辑简历 - HR招聘管理系统{% endblock %}
+
+{% block content %}
+<div class="mb-4">
+    <a href="{{ url_for('resumes.detail_view', resume_id=resume.id) }}" class="btn btn-sm btn-outline-secondary mb-3">
+        <i class="bi bi-arrow-left me-1"></i>返回详情
+    </a>
+    <h2 class="fw-bold"><i class="bi bi-pencil me-2"></i>编辑简历</h2>
+    <p class="text-muted">修改简历的结构化信息</p>
+</div>
+
+<div class="card border-0 shadow-sm">
+    <div class="card-body">
+        <form method="POST">
+            <div class="row g-3">
+                <div class="col-sm-6">
+                    <label class="form-label">姓名</label>
+                    <input type="text" name="name" class="form-control" value="{{ resume.name or '' }}">
+                </div>
+                <div class="col-sm-6">
+                    <label class="form-label">性别</label>
+                    <select name="gender" class="form-select">
+                        <option value="">请选择</option>
+                        <option value="男" {{ 'selected' if resume.gender == '男' }}>男</option>
+                        <option value="女" {{ 'selected' if resume.gender == '女' }}>女</option>
+                    </select>
+                </div>
+                <div class="col-sm-6">
+                    <label class="form-label">年龄</label>
+                    <input type="number" name="age" class="form-control" value="{{ resume.age if resume.age else '' }}" min="18" max="70">
+                </div>
+                <div class="col-sm-6">
+                    <label class="form-label">学历</label>
+                    <select name="education" class="form-select">
+                        <option value="">请选择</option>
+                        {% for edu in ['高中', '中专', '大专', '本科', '硕士', '博士', '博士后'] %}
+                        <option value="{{ edu }}" {{ 'selected' if resume.education == edu }}>{{ edu }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-sm-6">
+                    <label class="form-label">电话</label>
+                    <input type="text" name="phone" class="form-control" value="{{ resume.phone or '' }}">
+                </div>
+                <div class="col-sm-6">
+                    <label class="form-label">邮箱</label>
+                    <input type="email" name="email" class="form-control" value="{{ resume.email or '' }}">
+                </div>
+                <div class="col-sm-6">
+                    <label class="form-label">毕业院校</label>
+                    <input type="text" name="school" class="form-control" value="{{ resume.school or '' }}">
+                </div>
+                <div class="col-sm-6">
+                    <label class="form-label">专业</label>
+                    <input type="text" name="major" class="form-control" value="{{ resume.major or '' }}">
+                </div>
+                <div class="col-sm-6">
+                    <label class="form-label">工作经验（年）</label>
+                    <input type="number" name="experience_years" class="form-control" value="{{ resume.experience_years if resume.experience_years else '' }}" min="0">
+                </div>
+                <div class="col-sm-6">
+                    <label class="form-label">当前公司</label>
+                    <input type="text" name="current_company" class="form-control" value="{{ resume.current_company or '' }}">
+                </div>
+                <div class="col-sm-6">
+                    <label class="form-label">当前职位</label>
+                    <input type="text" name="current_position" class="form-control" value="{{ resume.current_position or '' }}">
+                </div>
+                <div class="col-12">
+                    <label class="form-label">技能标签（用逗号或中文逗号分隔）</label>
+                    <input type="text" name="skills" class="form-control" value="{{ resume.skills or '' }}" placeholder="例如：Python，Java，MySQL，项目管理">
+                </div>
+            </div>
+            <div class="mt-4 d-flex gap-2">
+                <button type="submit" class="btn btn-primary btn-lg">
+                    <i class="bi bi-check-circle me-1"></i>保存修改
+                </button>
+                <a href="{{ url_for('resumes.detail_view', resume_id=resume.id) }}" class="btn btn-outline-secondary btn-lg">取消</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

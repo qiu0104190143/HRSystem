@@ -37,6 +37,30 @@ def parse_resume(filepath, file_type):
     info = _extract_info(content_text)
     info['content_text'] = content_text
 
+    # 3. 生成结构化JSON（供AI/匹配引擎直接读取）
+    import json
+    info['parsed_json'] = json.dumps({
+        'basic': {
+            'name': info.get('name', ''),
+            'gender': info.get('gender', ''),
+            'age': info.get('age', 0),
+            'phone': info.get('phone', ''),
+            'email': info.get('email', ''),
+        },
+        'education': {
+            'level': info.get('education', ''),
+            'school': info.get('school', ''),
+            'major': info.get('major', ''),
+        },
+        'work': {
+            'years': info.get('experience_years', 0),
+            'current_company': info.get('current_company', ''),
+            'current_position': info.get('current_position', ''),
+        },
+        'skills': [s.strip() for s in info.get('skills', '').replace('，', ',').split(',') if s.strip()],
+        'raw_text': content_text,
+    }, ensure_ascii=False)
+
     return info
 
 

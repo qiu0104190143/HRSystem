@@ -39,9 +39,16 @@ def init_db():
             content_text TEXT DEFAULT '',
             file_path TEXT DEFAULT '',
             file_type TEXT DEFAULT '',
+            parsed_json TEXT DEFAULT '',
             created_at DATETIME DEFAULT CURRENT_TIMESTAMP
         )
     ''')
+
+    # 兼容旧数据库：如果 parsed_json 列不存在则添加
+    try:
+        cursor.execute('ALTER TABLE resumes ADD COLUMN parsed_json TEXT DEFAULT ""')
+    except sqlite3.OperationalError:
+        pass  # 列已存在
 
     # 职位表
     cursor.execute('''
@@ -123,8 +130,8 @@ def add_resume(data):
     conn.execute('''
         INSERT INTO resumes (name, gender, age, phone, email, education, school,
             major, skills, experience_years, current_company, current_position,
-            content_text, file_path, file_type)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            content_text, file_path, file_type, parsed_json)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     ''', (
         data.get('name', ''),
         data.get('gender', ''),
@@ -141,6 +148,7 @@ def add_resume(data):
         data.get('content_text', ''),
         data.get('file_path', ''),
         data.get('file_type', ''),
+        data.get('parsed_json', ''),
     ))
     conn.commit()
     resume_id = conn.execute('SELECT last_insert_rowid()').fetchone()[0]
@@ -175,7 +183,7 @@ def update_resume(resume_id, data):
     conn.execute('''
         UPDATE resumes SET name=?, gender=?, age=?, phone=?, email=?, education=?,
             school=?, major=?, skills=?, experience_years=?, current_company=?,
-            current_position=?, content_text=?
+            current_position=?, content_text=?, parsed_json=?
         WHERE id=?
     ''', (
         data.get('name', ''),
@@ -191,6 +199,7 @@ def update_resume(resume_id, data):
         data.get('current_company', ''),
         data.get('current_position', ''),
         data.get('content_text', ''),
+        data.get('parsed_json', ''),
         resume_id
     ))
     conn.commit()

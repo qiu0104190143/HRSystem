@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+{% block title %}上传结果 - HR招聘管理系统{% endblock %}
+
+{% block breadcrumb %}
+<span><i class="bi bi-people-fill me-1"></i> 简历库</span>
+<span class="text-muted">/</span>
+<span>上传结果</span>
+{% endblock %}
+
+{% block content %}
+<div class="fade-in">
+    <div class="text-center mb-4">
+        {% if success_count > 0 and fail_count == 0 %}
+        <div class="empty-icon mx-auto" style="background:#ecfdf5;color:#10b981;"><i class="bi bi-check-circle-fill"></i></div>
+        <h4 class="fw-bold mt-3 text-success">全部上传成功！</h4>
+        {% elif success_count > 0 and fail_count > 0 %}
+        <div class="empty-icon mx-auto" style="background:#fffbeb;color:#f59e0b;"><i class="bi bi-exclamation-circle-fill"></i></div>
+        <h4 class="fw-bold mt-3 text-warning">部分上传成功</h4>
+        {% else %}
+        <div class="empty-icon mx-auto" style="background:#fef2f2;color:#ef4444;"><i class="bi bi-x-circle-fill"></i></div>
+        <h4 class="fw-bold mt-3 text-danger">上传失败</h4>
+        {% endif %}
+        <p class="text-muted">成功 {{ success_count }} 份，失败 {{ fail_count }} 份，共 {{ results|length }} 个文件</p>
+    </div>
+
+    <div class="panel">
+        <div class="panel-header">
+            <div class="panel-title"><i class="bi bi-list-check"></i> 详细结果</div>
+        </div>
+        <div class="panel-body no-padding">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th style="width:60px;">状态</th>
+                        <th>文件名</th>
+                        <th>识别姓名</th>
+                        <th>说明</th>
+                        <th style="width:100px;">操作</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for r in results %}
+                    <tr>
+                        <td>
+                            {% if r.success %}
+                            <i class="bi bi-check-circle-fill text-success fs-5"></i>
+                            {% else %}
+                            <i class="bi bi-x-circle-fill text-danger fs-5"></i>
+                            {% endif %}
+                        </td>
+                        <td class="fw-bold">{{ r.filename }}</td>
+                        <td>{{ r.name or '-' }}</td>
+                        <td class="small">
+                            {% if r.success %}
+                            <span class="text-success">解析成功</span>
+                            {% else %}
+                            <span class="text-danger">{{ r.error }}</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if r.success and r.resume_id %}
+                            <a href="{{ url_for('resumes.detail_view', resume_id=r.resume_id) }}" class="btn-custom btn-sm-custom btn-primary-custom">
+                                <i class="bi bi-eye"></i> 查看
+                            </a>
+                            {% else %}
+                            <span class="text-muted">-</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="d-flex gap-3 justify-content-center mt-4">
+        <a href="{{ url_for('resumes.upload_view') }}" class="btn-custom btn-primary-custom btn-lg-custom">
+            <i class="bi bi-cloud-upload me-1"></i> 继续上传
+        </a>
+        <a href="{{ url_for('resumes.list_view') }}" class="btn-custom btn-outline-custom btn-lg-custom">
+            <i class="bi bi-list me-1"></i> 查看简历库
+        </a>
+    </div>
+</div>
+{% endblock %}

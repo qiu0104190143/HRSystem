@@ -14,6 +14,11 @@
         <p class="text-muted mb-0">{{ resume.current_position or '' }}{{ ' @ ' + resume.current_company if resume.current_company else '' }}</p>
     </div>
     <div class="d-flex gap-2">
+        <form method="POST" action="{{ url_for('resumes.reparse_view', resume_id=resume.id) }}" class="d-inline">
+            <button type="submit" class="btn-custom btn-accent" title="重新从原始文件提取结构化信息">
+                <i class="bi bi-arrow-repeat me-1"></i> 重新解析
+            </button>
+        </form>
         <a href="{{ url_for('resumes.edit_view', resume_id=resume.id) }}" class="btn-custom btn-outline-custom">
             <i class="bi bi-pencil me-1"></i> 编辑
         </a>

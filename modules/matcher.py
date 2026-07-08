@@ -1,6 +1,18 @@
 """智能匹配引擎 — 计算简历与职位的匹配度并生成原因"""
 import re
+import json
 from utils.helpers import get_education_level
+
+
+def _get_parsed_data(resume):
+    """优先从parsed_json读取结构化数据，回退到普通字段"""
+    pj = resume.get('parsed_json', '')
+    if pj:
+        try:
+            return json.loads(pj)
+        except (json.JSONDecodeError, TypeError):
+            pass
+    return None
 
 
 # 技能别名映射（模糊匹配）
@@ -128,9 +140,15 @@ def _match_skills(job, resume):
     if not job_skills_str:
         return 100, None
 
-    # 解析并标准化技能
+    # 优先从 parsed_json 读取技能列表
+    parsed = _get_parsed_data(resume)
+    if parsed and parsed.get('skills'):
+        resume_skills_raw = set(parsed['skills'])
+    else:
+        resume_skills_raw = set(s.strip() for s in re.split(r'[,，、\s]+', resume_skills_str) if s.strip())
+
+    # 解析职位技能
     job_skills_raw = set(s.strip() for s in re.split(r'[,，、\s]+', job_skills_str) if s.strip())
-    resume_skills_raw = set(s.strip() for s in re.split(r'[,，、\s]+', resume_skills_str) if s.strip())
 
     # 从简历内容中补充搜索技能
     content = resume.get('content_text', '').lower()

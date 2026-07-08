@@ -53,16 +53,25 @@ document.addEventListener('DOMContentLoaded', function () {
             uploadZone.classList.remove('drag-over');
             if (e.dataTransfer.files.length > 0) {
                 fileInput.files = e.dataTransfer.files;
-                showFileInfo(e.dataTransfer.files[0]);
+                showFileInfo(e.dataTransfer.files);
             }
         });
         fileInput.addEventListener('change', function () {
-            if (this.files.length > 0) showFileInfo(this.files[0]);
+            if (this.files.length > 0) showFileInfo(this.files);
         });
     }
 
-    function showFileInfo(file) {
-        if (fileName) fileName.textContent = file.name + ' (' + formatFileSize(file.size) + ')';
+    function showFileInfo(files) {
+        if (!files) return;
+        var fileList = files.length !== undefined ? files : [files];
+        if (fileList.length === 0) return;
+        if (fileList.length === 1) {
+            if (fileName) fileName.textContent = fileList[0].name + ' (' + formatFileSize(fileList[0].size) + ')';
+        } else {
+            var totalSize = 0;
+            for (var i = 0; i < fileList.length; i++) totalSize += fileList[i].size;
+            if (fileName) fileName.textContent = fileList[0].name + ' 等 ' + fileList.length + ' 个文件 (' + formatFileSize(totalSize) + ')';
+        }
         if (fileInfo) fileInfo.classList.remove('d-none');
     }
 

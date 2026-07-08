@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+{% block title %}系统设置 - HR招聘管理系统{% endblock %}
+
+{% block breadcrumb %}
+<span><i class="bi bi-gear-fill me-1"></i> 系统设置</span>
+{% endblock %}
+
+{% block content %}
+<div class="fade-in">
+    <h3 class="fw-bold mb-4"><i class="bi bi-gear-fill me-2"></i>系统设置</h3>
+
+    <div class="row g-4">
+        <!-- AI 配置 -->
+        <div class="col-lg-7">
+            <div class="panel">
+                <div class="panel-header">
+                    <div class="panel-title"><i class="bi bi-cpu"></i> AI 简历解析配置</div>
+                </div>
+                <div class="panel-body">
+                    <form method="POST">
+                        <div class="mb-4">
+                            <label class="form-label-custom">API Key <span class="text-danger">*</span></label>
+                            <input type="password" name="ai_api_key" class="form-control-custom"
+                                   value="{{ config.ai_api_key }}" placeholder="sk-xxxxxxxxxxxxxxxx"
+                                   style="font-family:monospace;">
+                            {% if masked_key %}
+                            <small class="text-muted">当前：{{ masked_key }}</small>
+                            {% else %}
+                            <small class="text-muted">请输入DeepSeek API Key，用于AI智能解析简历</small>
+                            {% endif %}
+                        </div>
+                        <div class="mb-4">
+                            <label class="form-label-custom">API 地址</label>
+                            <input type="text" name="ai_api_url" class="form-control-custom"
+                                   value="{{ config.ai_api_url }}" placeholder="https://api.deepseek.com/v1/chat/completions">
+                            <small class="text-muted">DeepSeek默认地址，一般无需修改</small>
+                        </div>
+                        <div class="mb-4">
+                            <label class="form-label-custom">模型</label>
+                            <select name="ai_model" class="form-control-custom" style="max-width:300px;">
+                                <option value="deepseek-chat" {{ 'selected' if config.ai_model == 'deepseek-chat' }}>deepseek-chat（推荐）</option>
+                                <option value="deepseek-reasoner" {{ 'selected' if config.ai_model == 'deepseek-reasoner' }}>deepseek-reasoner（深度推理）</option>
+                            </select>
+                            <small class="text-muted">deepseek-chat 速度快成本低，适合简历解析</small>
+                        </div>
+                        <button type="submit" class="btn-custom btn-primary-custom btn-lg-custom">
+                            <i class="bi bi-check-circle me-1"></i> 保存设置
+                        </button>
+                        {% if config.ai_api_key %}
+                        <a href="{{ url_for('resumes.upload_view') }}" class="btn-custom btn-outline-custom btn-lg-custom ms-2">
+                            <i class="bi bi-cloud-upload me-1"></i> 去上传简历测试
+                        </a>
+                        {% endif %}
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- 状态说明 -->
+        <div class="col-lg-5">
+            <div class="panel mb-4">
+                <div class="panel-header">
+                    <div class="panel-title"><i class="bi bi-info-circle"></i> 当前状态</div>
+                </div>
+                <div class="panel-body">
+                    <div class="d-flex align-items-center gap-3 mb-3">
+                        <div class="rounded-circle d-flex align-items-center justify-content-center"
+                             style="width:48px;height:48px;background:{{ '#ecfdf5' if config.ai_api_key else '#fef2f2' }};">
+                            <i class="bi bi-{{ 'check-circle-fill text-success' if config.ai_api_key else 'x-circle-fill text-danger' }} fs-4"></i>
+                        </div>
+                        <div>
+                            <strong>{{ 'AI解析已配置' if config.ai_api_key else 'AI解析未配置' }}</strong>
+                            <br><small class="text-muted">{{ '上传简历将使用AI智能解析' if config.ai_api_key else '请输入API Key启用AI解析' }}</small>
+                        </div>
+                    </div>
+                    <div class="small text-muted">
+                        <p><i class="bi bi-key me-1"></i> API Key存储在本地数据库，不会上传到任何地方</p>
+                        <p><i class="bi bi-shield-check me-1"></i> 如果API Key未配置，系统会自动使用规则解析作为回退方案</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel">
+                <div class="panel-header">
+                    <div class="panel-title"><i class="bi bi-question-circle"></i> 如何获取API Key？</div>
+                </div>
+                <div class="panel-body small" style="line-height:1.9;">
+                    <p>1. 打开 <a href="https://platform.deepseek.com" target="_blank">platform.deepseek.com</a> 注册账号</p>
+                    <p>2. 进入「API Keys」页面，点击「创建API Key」</p>
+                    <p>3. 复制生成的 <code>sk-xxxx</code> 粘贴到左侧输入框</p>
+                    <p>4. 新用户通常有免费额度，之后按使用量计费（约1元/百万token）</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -18,6 +18,7 @@ from modules.routes.job_routes import job_bp
 from modules.routes.search_routes import search_bp
 from modules.stats import stats_bp
 from modules.auth import auth_bp, login_required
+from modules.routes.settings_routes import settings_bp
 from utils.helpers import get_local_ip
 
 
@@ -42,6 +43,7 @@ def create_app():
     app.register_blueprint(job_bp)
     app.register_blueprint(search_bp)
     app.register_blueprint(stats_bp)
+    app.register_blueprint(settings_bp)
 
     # 全局上下文：所有模板可用的变量
     @app.context_processor

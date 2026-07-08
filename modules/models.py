@@ -81,8 +81,45 @@ def init_db():
         )
     ''')
 
+    # 系统设置表（键值对存储）
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS settings (
+            key TEXT PRIMARY KEY,
+            value TEXT DEFAULT ''
+        )
+    ''')
+
     conn.commit()
     conn.close()
+
+
+# ========== 系统设置操作 ==========
+
+def get_setting(key, default=''):
+    """获取单个设置值"""
+    conn = get_db()
+    row = conn.execute('SELECT value FROM settings WHERE key = ?', (key,)).fetchone()
+    conn.close()
+    return row['value'] if row else default
+
+
+def save_setting(key, value):
+    """保存设置（存在则更新，不存在则插入）"""
+    conn = get_db()
+    conn.execute('''
+        INSERT INTO settings (key, value) VALUES (?, ?)
+        ON CONFLICT(key) DO UPDATE SET value = excluded.value
+    ''', (key, str(value)))
+    conn.commit()
+    conn.close()
+
+
+def get_all_settings():
+    """获取所有设置"""
+    conn = get_db()
+    rows = conn.execute('SELECT * FROM settings').fetchall()
+    conn.close()
+    return {r['key']: r['value'] for r in rows}
 
 
 def create_default_admin():

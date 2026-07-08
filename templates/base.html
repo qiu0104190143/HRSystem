@@ -47,6 +47,13 @@
                 </a>
             </nav>
 
+            <div class="sidebar-bottom-nav">
+                <a href="{{ url_for('settings.settings_view') }}" class="nav-item {{ 'active' if request.path.startswith('/settings') }}">
+                    <i class="bi bi-gear-fill"></i>
+                    <span>系统设置</span>
+                </a>
+            </div>
+
             <div class="sidebar-footer">
                 <div class="user-info">
                     <div class="avatar">{{ (current_user.display_name or current_user.username)[:2] if current_user else 'HR' }}</div>

@@ -1,127 +1,107 @@
 {% extends "base.html" %}
 {% block title %}上传简历 - HR招聘管理系统{% endblock %}
 
-{% block content %}
-<div class="mb-4">
-    <h2 class="fw-bold"><i class="bi bi-upload me-2"></i>上传简历</h2>
-    <p class="text-muted">支持上传 .txt（纯文本）、.docx（Word文档）、.pdf（PDF文档）格式</p>
-</div>
+{% block breadcrumb %}
+<span><i class="bi bi-people-fill me-1"></i> 简历库</span>
+<span class="text-muted">/</span>
+<span>上传简历</span>
+{% endblock %}
 
-<div class="row">
+{% block content %}
+<div class="row g-4 fade-in">
     <div class="col-lg-8">
-        <div class="card border-0 shadow-sm">
-            <div class="card-header bg-white border-bottom">
-                <h5 class="mb-0 fw-bold">选择文件上传</h5>
+        <div class="panel">
+            <div class="panel-header">
+                <div class="panel-title"><i class="bi bi-cloud-upload"></i> 选择简历文件</div>
             </div>
-            <div class="card-body">
-                <form method="POST" enctype="multipart/form-data" id="uploadForm">
-                    <!-- 文件选择区域 -->
-                    <div class="mb-4">
-                        <label class="form-label fw-bold">简历文件 <span class="text-danger">*</span></label>
-                        <div class="upload-zone border border-2 border-dashed rounded-3 p-5 text-center cursor-pointer" id="uploadZone">
-                            <i class="bi bi-cloud-upload fs-1 text-primary"></i>
-                            <p class="mt-2 mb-1 fw-bold">点击选择文件或拖拽到此处</p>
-                            <p class="text-muted small mb-0">支持 .txt / .docx / .pdf 格式，文件大小不超过16MB</p>
-                            <input type="file" name="file" id="fileInput" class="d-none" accept=".txt,.docx,.pdf" required>
-                        </div>
-                        <div id="fileInfo" class="mt-2 d-none">
-                            <span class="badge bg-success fs-6" id="fileName"></span>
-                            <button type="button" class="btn btn-sm btn-outline-secondary ms-2" onclick="resetFile()">重新选择</button>
+            <div class="panel-body">
+                <form method="POST" enctype="multipart/form-data">
+                    <!-- 上传区域 -->
+                    <div class="upload-zone-new" id="uploadZone">
+                        <div class="upload-icon"><i class="bi bi-file-earmark-arrow-up"></i></div>
+                        <h5 class="fw-bold mb-2">点击选择文件或拖拽到此处</h5>
+                        <p class="text-muted mb-3">支持 .txt（纯文本） .docx（Word文档） .pdf（PDF文档）</p>
+                        <span class="badge-custom badge-info">单个文件最大 16MB</span>
+                        <input type="file" name="file" id="fileInput" class="d-none" accept=".txt,.docx,.pdf" required>
+                    </div>
+                    <div id="fileInfo" class="mt-3 d-none">
+                        <div class="d-flex align-items-center gap-3 p-3 bg-light rounded-3">
+                            <i class="bi bi-file-earmark-check text-success fs-3"></i>
+                            <div>
+                                <span class="fw-bold" id="fileName"></span>
+                                <br><small class="text-muted">文件已选择，点击下方按钮上传</small>
+                            </div>
+                            <button type="button" class="btn btn-sm btn-outline-danger ms-auto" onclick="resetFile()">重新选择</button>
                         </div>
                     </div>
 
                     <hr class="my-4">
 
-                    <!-- 提醒信息 -->
-                    <div class="alert alert-info small">
-                        <i class="bi bi-info-circle me-2"></i>
-                        <strong>提示：</strong>上传后系统会自动解析简历内容，您也可以手动补充和修正信息。系统会尝试提取姓名、学历、技能、工作经验等结构化信息。
+                    <!-- 手动补充信息区 -->
+                    <div class="form-section">
+                        <div class="form-section-title"><i class="bi bi-pencil-square text-primary"></i> 补充基本信息（可选，上传后也可修改）</div>
+                        <div class="form-row cols-3">
+                            <div>
+                                <label class="form-label-custom">姓名</label>
+                                <input type="text" name="name" class="form-control-custom" placeholder="如已知姓名可填写">
+                            </div>
+                            <div>
+                                <label class="form-label-custom">性别</label>
+                                <select name="gender" class="form-control-custom">
+                                    <option value="">未知</option>
+                                    <option value="男">男</option>
+                                    <option value="女">女</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="form-label-custom">年龄</label>
+                                <input type="number" name="age" class="form-control-custom" placeholder="可选" min="18" max="70">
+                            </div>
+                            <div>
+                                <label class="form-label-custom">学历</label>
+                                <select name="education" class="form-control-custom">
+                                    <option value="">未知</option>
+                                    {% for edu in ['高中','中专','大专','本科','硕士','博士'] %}
+                                    <option value="{{ edu }}">{{ edu }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div>
+                                <label class="form-label-custom">工作经验(年)</label>
+                                <input type="number" name="experience_years" class="form-control-custom" placeholder="可选" min="0">
+                            </div>
+                            <div>
+                                <label class="form-label-custom">技能标签</label>
+                                <input type="text" name="skills" class="form-control-custom" placeholder="如：Python，Java">
+                            </div>
+                        </div>
                     </div>
 
-                    <button type="submit" class="btn btn-primary btn-lg w-100">
-                        <i class="bi bi-upload me-1"></i>上传并解析简历
+                    <button type="submit" class="btn-custom btn-primary-custom btn-lg-custom w-100 mt-2">
+                        <i class="bi bi-upload me-1"></i> 上传并智能解析简历
                     </button>
                 </form>
             </div>
         </div>
     </div>
+
     <div class="col-lg-4">
-        <div class="card border-0 shadow-sm">
-            <div class="card-header bg-white border-bottom">
-                <h5 class="mb-0 fw-bold">📋 支持格式说明</h5>
+        <div class="panel">
+            <div class="panel-header">
+                <div class="panel-title"><i class="bi bi-info-circle"></i> 上传说明</div>
             </div>
-            <div class="card-body">
-                <ul class="list-unstyled mb-0">
-                    <li class="mb-3">
-                        <i class="bi bi-file-text text-primary me-2"></i>
-                        <strong>.txt 纯文本</strong>
-                        <p class="text-muted small mb-0 ms-4">直接读取文本内容，适合简单的纯文本简历</p>
-                    </li>
-                    <li class="mb-3">
-                        <i class="bi bi-file-word text-primary me-2"></i>
-                        <strong>.docx Word文档</strong>
-                        <p class="text-muted small mb-0 ms-4">解析Word文档中的文字和表格内容</p>
-                    </li>
-                    <li>
-                        <i class="bi bi-file-pdf text-primary me-2"></i>
-                        <strong>.pdf PDF文档</strong>
-                        <p class="text-muted small mb-0 ms-4">提取PDF文件中的文本内容</p>
-                    </li>
+            <div class="panel-body">
+                <ul class="list-unstyled mb-0" style="line-height:2.2;">
+                    <li><i class="bi bi-check2-circle text-success me-2"></i> <strong>.txt</strong> 纯文本简历</li>
+                    <li><i class="bi bi-check2-circle text-success me-2"></i> <strong>.docx</strong> Word文档（含表格）</li>
+                    <li><i class="bi bi-check2-circle text-success me-2"></i> <strong>.pdf</strong> PDF文档</li>
                 </ul>
+                <hr>
+                <p class="small text-muted mb-0">
+                    <i class="bi bi-magic me-1"></i> 系统会自动识别简历中的姓名、学历、年龄、技能、工作经历等关键信息。上传后可在详情页进行修正。
+                </p>
             </div>
         </div>
     </div>
 </div>
-{% endblock %}
-
-{% block extra_js %}
-<script>
-// 点击上传区域触发文件选择
-document.getElementById('uploadZone').addEventListener('click', function() {
-    document.getElementById('fileInput').click();
-});
-
-// 拖拽上传
-var zone = document.getElementById('uploadZone');
-zone.addEventListener('dragover', function(e) {
-    e.preventDefault();
-    zone.classList.add('border-primary', 'bg-light');
-});
-zone.addEventListener('dragleave', function(e) {
-    e.preventDefault();
-    zone.classList.remove('border-primary', 'bg-light');
-});
-zone.addEventListener('drop', function(e) {
-    e.preventDefault();
-    zone.classList.remove('border-primary', 'bg-light');
-    var files = e.dataTransfer.files;
-    if (files.length > 0) {
-        document.getElementById('fileInput').files = files;
-        showFileInfo(files[0]);
-    }
-});
-
-// 文件选择变化时显示文件名
-document.getElementById('fileInput').addEventListener('change', function() {
-    if (this.files.length > 0) {
-        showFileInfo(this.files[0]);
-    }
-});
-
-function showFileInfo(file) {
-    document.getElementById('fileName').textContent = '📎 ' + file.name + ' (' + formatFileSize(file.size) + ')';
-    document.getElementById('fileInfo').classList.remove('d-none');
-}
-
-function resetFile() {
-    document.getElementById('fileInput').value = '';
-    document.getElementById('fileInfo').classList.add('d-none');
-}
-
-function formatFileSize(bytes) {
-    if (bytes < 1024) return bytes + ' B';
-    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
-    return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
-}
-</script>
 {% endblock %}

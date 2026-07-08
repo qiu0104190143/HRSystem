@@ -16,6 +16,7 @@ from modules.models import init_db, get_resume_count, get_job_count, get_active_
 from modules.routes.resume_routes import resume_bp
 from modules.routes.job_routes import job_bp
 from modules.routes.search_routes import search_bp
+from modules.stats import stats_bp
 from utils.helpers import get_local_ip
 
 
@@ -37,6 +38,15 @@ def create_app():
     app.register_blueprint(resume_bp)
     app.register_blueprint(job_bp)
     app.register_blueprint(search_bp)
+    app.register_blueprint(stats_bp)
+
+    # 全局上下文：所有模板可用的变量
+    @app.context_processor
+    def inject_globals():
+        return {
+            'local_ip': get_local_ip(),
+            'port': PORT,
+        }
 
     # 首页路由
     @app.route('/')

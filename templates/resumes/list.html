@@ -1,120 +1,119 @@
 {% extends "base.html" %}
-{% block title %}简历管理 - HR招聘管理系统{% endblock %}
+{% block title %}简历库 - HR招聘管理系统{% endblock %}
+
+{% block breadcrumb %}
+<span><i class="bi bi-people-fill me-1"></i> 简历库</span>
+<span class="text-muted">（共 {{ total }} 份）</span>
+{% endblock %}
 
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <div>
-        <h2 class="fw-bold mb-0"><i class="bi bi-file-earmark-person me-2"></i>简历管理</h2>
-        <p class="text-muted mb-0">共 {{ total }} 份简历</p>
-    </div>
-    <a href="{{ url_for('resumes.upload_view') }}" class="btn btn-primary">
-        <i class="bi bi-upload me-1"></i>上传简历
+<div class="d-flex justify-content-between align-items-center mb-4 fade-in">
+    <div></div>
+    <a href="{{ url_for('resumes.upload_view') }}" class="btn-custom btn-primary-custom">
+        <i class="bi bi-cloud-upload me-1"></i> 上传简历
     </a>
 </div>
 
 {% if resumes %}
-<div class="table-responsive">
-    <table class="table table-hover align-middle shadow-sm rounded">
-        <thead class="table-light">
-            <tr>
-                <th>姓名</th>
-                <th>性别</th>
-                <th>年龄</th>
-                <th>学历</th>
-                <th>工作经验</th>
-                <th>技能</th>
-                <th>上传时间</th>
-                <th>操作</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for resume in resumes %}
-            <tr>
-                <td>
-                    <a href="{{ url_for('resumes.detail_view', resume_id=resume.id) }}" class="fw-bold text-decoration-none">
-                        {{ resume.name or '未命名' }}
-                    </a>
-                </td>
-                <td>{{ resume.gender or '-' }}</td>
-                <td>{{ resume.age if resume.age else '-' }}</td>
-                <td>
-                    {% if resume.education %}
-                    <span class="badge bg-info">{{ resume.education }}</span>
-                    {% else %}
-                    -
-                    {% endif %}
-                </td>
-                <td>{{ (resume.experience_years|string + '年') if resume.experience_years else '-' }}</td>
-                <td>
-                    {% if resume.skills %}
-                    <small class="text-muted">{{ resume.skills[:50] }}{% if resume.skills|length > 50 %}...{% endif %}</small>
-                    {% else %}
-                    -
-                    {% endif %}
-                </td>
-                <td><small class="text-muted">{{ resume.created_at[:10] if resume.created_at else '' }}</small></td>
-                <td>
-                    <div class="btn-group btn-group-sm">
-                        <a href="{{ url_for('resumes.detail_view', resume_id=resume.id) }}" class="btn btn-outline-primary" title="查看">
-                            <i class="bi bi-eye"></i>
-                        </a>
-                        <a href="{{ url_for('resumes.edit_view', resume_id=resume.id) }}" class="btn btn-outline-warning" title="编辑">
-                            <i class="bi bi-pencil"></i>
-                        </a>
-                        <button type="button" class="btn btn-outline-danger" title="删除"
-                                onclick="confirmDelete('{{ url_for('resumes.delete_view', resume_id=resume.id) }}', '{{ resume.name or '未命名' }}')">
-                            <i class="bi bi-trash"></i>
-                        </button>
-                    </div>
-                </td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+<div class="panel fade-in">
+    <div class="panel-body no-padding">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>候选人</th>
+                    <th>性别</th>
+                    <th>年龄</th>
+                    <th>学历</th>
+                    <th>经验</th>
+                    <th>技能特长</th>
+                    <th>上传时间</th>
+                    <th style="width:120px;">操作</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% set colors = ['bg-blue','bg-green','bg-purple','bg-amber','bg-rose','bg-teal'] %}
+                {% for resume in resumes %}
+                <tr>
+                    <td>
+                        <div class="avatar-cell">
+                            <div class="avatar-circle {{ colors[resume.id % 6] }}">
+                                {{ (resume.name or '?')[0] }}
+                            </div>
+                            <div>
+                                <a href="{{ url_for('resumes.detail_view', resume_id=resume.id) }}"
+                                   class="fw-bold text-decoration-none text-dark d-block">
+                                    {{ resume.name or '未命名' }}
+                                </a>
+                                <small class="text-muted">{{ resume.current_position or '' }}</small>
+                            </div>
+                        </div>
+                    </td>
+                    <td>{{ resume.gender or '-' }}</td>
+                    <td>{{ resume.age if resume.age else '-' }}</td>
+                    <td>
+                        {% if resume.education %}
+                        <span class="badge-custom badge-primary">{{ resume.education }}</span>
+                        {% else %}-{% endif %}
+                    </td>
+                    <td>{{ (resume.experience_years|string + '年') if resume.experience_years else '-' }}</td>
+                    <td>
+                        {% if resume.skills %}
+                        <div style="max-width:240px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;"
+                             title="{{ resume.skills }}">
+                            {% for skill in resume.skills.replace('，', ',').split(',')[:3] %}
+                            <span class="badge-custom badge-purple me-1" style="font-size:10px;">{{ skill.strip() }}</span>
+                            {% endfor %}
+                            {% if resume.skills.replace('，', ',').split(',')|length > 3 %}
+                            <small class="text-muted">+{{ resume.skills.replace('，', ',').split(',')|length - 3 }}</small>
+                            {% endif %}
+                        </div>
+                        {% else %}-{% endif %}
+                    </td>
+                    <td><small>{{ resume.created_at[:10] if resume.created_at else '' }}</small></td>
+                    <td>
+                        <div class="d-flex gap-1">
+                            <a href="{{ url_for('resumes.detail_view', resume_id=resume.id) }}"
+                               class="btn-icon" title="查看" style="width:32px;height:32px;border-radius:6px;border:1px solid #e5e7eb;display:flex;align-items:center;justify-content:center;color:#6b7280;text-decoration:none;background:#fff;">
+                                <i class="bi bi-eye"></i>
+                            </a>
+                            <a href="{{ url_for('resumes.edit_view', resume_id=resume.id) }}"
+                               class="btn-icon" title="编辑" style="width:32px;height:32px;border-radius:6px;border:1px solid #e5e7eb;display:flex;align-items:center;justify-content:center;color:#6b7280;text-decoration:none;background:#fff;">
+                                <i class="bi bi-pencil"></i>
+                            </a>
+                            <button onclick="confirmDeleteModal('{{ url_for('resumes.delete_view', resume_id=resume.id) }}', '{{ resume.name or '未命名' }}')"
+                               class="btn-icon" title="删除" style="width:32px;height:32px;border-radius:6px;border:1px solid #fee2e2;display:flex;align-items:center;justify-content:center;color:#ef4444;text-decoration:none;background:#fff;cursor:pointer;">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
 </div>
 
 <!-- 分页 -->
 {% if total_pages > 1 %}
-<nav class="d-flex justify-content-center mt-4">
-    <ul class="pagination shadow-sm">
-        <li class="page-item {{ 'disabled' if page <= 1 }}">
-            <a class="page-link" href="?page={{ page - 1 }}">上一页</a>
-        </li>
-        {% for p in range(1, total_pages + 1) %}
-        <li class="page-item {{ 'active' if p == page }}">
-            <a class="page-link" href="?page={{ p }}">{{ p }}</a>
-        </li>
-        {% endfor %}
-        <li class="page-item {{ 'disabled' if page >= total_pages }}">
-            <a class="page-link" href="?page={{ page + 1 }}">下一页</a>
-        </li>
-    </ul>
-</nav>
+<div class="pagination-custom">
+    <a class="page-link-custom {{ 'disabled opacity-50' if page <= 1 }}" href="?page={{ page-1 }}"><i class="bi bi-chevron-left"></i></a>
+    {% for p in range(1, total_pages+1) %}
+    <a class="page-link-custom {{ 'active' if p == page }}" href="?page={{ p }}">{{ p }}</a>
+    {% endfor %}
+    <a class="page-link-custom {{ 'disabled opacity-50' if page >= total_pages }}" href="?page={{ page+1 }}"><i class="bi bi-chevron-right"></i></a>
+</div>
 {% endif %}
 
 {% else %}
-<div class="text-center py-5">
-    <i class="bi bi-inbox fs-1 text-muted"></i>
-    <h4 class="text-muted mt-3">暂无简历</h4>
-    <p class="text-muted">点击上传简历开始使用</p>
-    <a href="{{ url_for('resumes.upload_view') }}" class="btn btn-primary btn-lg">
-        <i class="bi bi-upload me-1"></i>上传第一份简历
+<div class="empty-state fade-in">
+    <div class="empty-icon"><i class="bi bi-file-earmark-text"></i></div>
+    <h5 class="fw-bold">还没有简历</h5>
+    <p class="text-muted mb-4">上传简历文件（Word/PDF/文本），系统会自动解析内容</p>
+    <a href="{{ url_for('resumes.upload_view') }}" class="btn-custom btn-primary-custom btn-lg-custom">
+        <i class="bi bi-cloud-upload me-1"></i> 上传第一份简历
     </a>
 </div>
 {% endif %}
 
-<!-- 删除确认表单 -->
-<form id="deleteForm" method="POST" style="display: none;"></form>
-{% endblock %}
-
-{% block extra_js %}
-<script>
-function confirmDelete(url, name) {
-    if (confirm('确定要删除简历 "' + name + '" 吗？此操作不可恢复。')) {
-        var form = document.getElementById('deleteForm');
-        form.action = url;
-        form.submit();
-    }
-}
-</script>
+<form id="deleteForm" method="POST" style="display:none;"></form>
 {% endblock %}

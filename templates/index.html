@@ -1,166 +1,155 @@
 {% extends "base.html" %}
-{% block title %}首页 - HR招聘管理系统{% endblock %}
+{% block title %}工作台 - HR招聘管理系统{% endblock %}
+
+{% block breadcrumb %}
+<span>📊 工作台</span>
+{% endblock %}
 
 {% block content %}
-<div class="mb-4">
-    <h2 class="fw-bold"><i class="bi bi-speedometer2 me-2"></i>首页概览</h2>
-    <p class="text-muted">欢迎使用HR招聘管理系统，以下是当前数据概览</p>
-    <div class="alert alert-info small">
-        <i class="bi bi-info-circle me-2"></i>局域网访问地址：<strong>http://{{ local_ip }}:{{ port }}</strong>（同事可通过此地址访问）
-    </div>
-</div>
-
 <!-- 统计卡片 -->
-<div class="row g-3 mb-4">
-    <div class="col-sm-6 col-lg-3">
-        <div class="card border-0 shadow-sm stat-card bg-primary bg-opacity-10">
-            <div class="card-body">
-                <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                        <p class="text-muted mb-1 small">简历总数</p>
-                        <h3 class="fw-bold mb-0 text-primary">{{ stats.resume_count }}</h3>
-                    </div>
-                    <div class="stat-icon bg-primary bg-opacity-25 rounded-circle p-3">
-                        <i class="bi bi-file-earmark-person fs-4 text-primary"></i>
-                    </div>
-                </div>
-                <small class="text-muted">本周新增 {{ stats.week_resume_count }} 份</small>
+<div class="stats-grid fade-in">
+    <div class="stat-card card-blue">
+        <div class="card-icon"><i class="bi bi-people-fill"></i></div>
+        <div class="card-value" id="statResumes">{{ stats.resume_count }}</div>
+        <div class="card-label">简历总数</div>
+        <div class="card-trend trend-up">
+            <i class="bi bi-arrow-up-short"></i> 本周新增 {{ stats.week_resume_count }} 份
+        </div>
+    </div>
+    <div class="stat-card card-green">
+        <div class="card-icon"><i class="bi bi-briefcase-fill"></i></div>
+        <div class="card-value">{{ stats.job_count }}</div>
+        <div class="card-label">职位总数</div>
+        <div class="card-trend trend-up">
+            <i class="bi bi-dot"></i> 招聘中 {{ stats.active_job_count }} 个
+        </div>
+    </div>
+    <div class="stat-card card-amber">
+        <div class="card-icon"><i class="bi bi-graph-up"></i></div>
+        <div class="card-value">{{ stats.active_job_count }}</div>
+        <div class="card-label">招聘中职位</div>
+        <div class="card-trend">
+            <i class="bi bi-clock"></i> 待匹配候选人
+        </div>
+    </div>
+    <div class="stat-card card-purple">
+        <div class="card-icon"><i class="bi bi-lightning-charge-fill"></i></div>
+        <div class="card-value">3</div>
+        <div class="card-label">功能模块</div>
+        <div class="card-trend">
+            <span style="font-size:12px;">简历 · 职位 · 匹配</span>
+        </div>
+    </div>
+</div>
+
+<!-- 图表区 -->
+<div class="charts-grid fade-in">
+    <!-- 简历趋势柱状图 -->
+    <div class="panel">
+        <div class="panel-header">
+            <div class="panel-title"><i class="bi bi-bar-chart-fill"></i> 简历上传趋势（近30天）</div>
+        </div>
+        <div class="panel-body">
+            <div class="chart-container" style="height:280px;">
+                <canvas id="resumeTrendChart"></canvas>
             </div>
         </div>
     </div>
-    <div class="col-sm-6 col-lg-3">
-        <div class="card border-0 shadow-sm stat-card bg-success bg-opacity-10">
-            <div class="card-body">
-                <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                        <p class="text-muted mb-1 small">职位总数</p>
-                        <h3 class="fw-bold mb-0 text-success">{{ stats.job_count }}</h3>
-                    </div>
-                    <div class="stat-icon bg-success bg-opacity-25 rounded-circle p-3">
-                        <i class="bi bi-briefcase fs-4 text-success"></i>
-                    </div>
-                </div>
-                <small class="text-muted">招聘中 {{ stats.active_job_count }} 个</small>
+
+    <!-- 学历分布 -->
+    <div class="panel">
+        <div class="panel-header">
+            <div class="panel-title"><i class="bi bi-pie-chart-fill"></i> 学历分布</div>
+        </div>
+        <div class="panel-body">
+            <div class="chart-container" style="height:240px;">
+                <canvas id="educationPieChart"></canvas>
             </div>
         </div>
     </div>
-    <div class="col-sm-6 col-lg-3">
-        <div class="card border-0 shadow-sm stat-card bg-warning bg-opacity-10">
-            <div class="card-body">
-                <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                        <p class="text-muted mb-1 small">待处理</p>
-                        <h3 class="fw-bold mb-0 text-warning">{{ stats.active_job_count }}</h3>
-                    </div>
-                    <div class="stat-icon bg-warning bg-opacity-25 rounded-circle p-3">
-                        <i class="bi bi-hourglass-split fs-4 text-warning"></i>
-                    </div>
-                </div>
-                <small class="text-muted">招聘中职位待匹配</small>
-            </div>
+
+    <!-- 职位状态 -->
+    <div class="panel">
+        <div class="panel-header">
+            <div class="panel-title"><i class="bi bi-pie-chart-fill"></i> 职位状态</div>
         </div>
-    </div>
-    <div class="col-sm-6 col-lg-3">
-        <div class="card border-0 shadow-sm stat-card bg-info bg-opacity-10">
-            <div class="card-body">
-                <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                        <p class="text-muted mb-1 small">快捷操作</p>
-                        <h3 class="fw-bold mb-0 text-info">3</h3>
-                    </div>
-                    <div class="stat-icon bg-info bg-opacity-25 rounded-circle p-3">
-                        <i class="bi bi-lightning-charge fs-4 text-info"></i>
-                    </div>
-                </div>
-                <small class="text-muted">核心功能模块</small>
+        <div class="panel-body">
+            <div class="chart-container" style="height:240px;">
+                <canvas id="jobStatusChart"></canvas>
             </div>
         </div>
     </div>
 </div>
 
-<!-- 快捷操作按钮 -->
-<div class="row g-3 mb-4">
-    <div class="col-12">
-        <div class="card border-0 shadow-sm">
-            <div class="card-body d-flex flex-wrap gap-2">
-                <a href="{{ url_for('resumes.upload_view') }}" class="btn btn-primary">
-                    <i class="bi bi-upload me-1"></i>上传简历
+<!-- 最近动态 + 快捷操作 -->
+<div class="row g-4 fade-in">
+    <div class="col-lg-8">
+        <div class="panel h-100">
+            <div class="panel-header">
+                <div class="panel-title"><i class="bi bi-clock-history"></i> 最近动态</div>
+            </div>
+            <div class="panel-body">
+                <div class="timeline" id="activityTimeline">
+                    {% if recent_resumes or recent_jobs %}
+                        {% for r in recent_resumes %}
+                        <div class="timeline-item">
+                            <div class="tl-time">{{ r.created_at[:10] if r.created_at else '' }}</div>
+                            <div class="tl-title">
+                                <a href="{{ url_for('resumes.detail_view', resume_id=r.id) }}" class="text-decoration-none">
+                                    新简历：{{ r.name or '未命名' }}
+                                </a>
+                            </div>
+                            <div class="tl-sub">{{ r.education or '' }} {{ r.major or '' }} {{ r.school or '' }}</div>
+                        </div>
+                        {% endfor %}
+                        {% for j in recent_jobs[:3] %}
+                        <div class="timeline-item">
+                            <div class="tl-time">{{ j.created_at[:10] if j.created_at else '' }}</div>
+                            <div class="tl-title">
+                                <a href="{{ url_for('jobs.detail_view', job_id=j.id) }}" class="text-decoration-none">
+                                    {{ '发布' if j.status == '招聘中' else '更新' }}职位：{{ j.title }}
+                                </a>
+                            </div>
+                            <div class="tl-sub">
+                                {% if j.salary_min or j.salary_max %}{{ j.salary_min }}-{{ j.salary_max }}K · {% endif %}
+                                {{ j.status }}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                    <div class="text-center text-muted py-3">暂无动态，开始使用系统吧</div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-4">
+        <div class="panel h-100">
+            <div class="panel-header">
+                <div class="panel-title"><i class="bi bi-rocket-takeoff"></i> 快捷操作</div>
+            </div>
+            <div class="panel-body d-flex flex-column gap-3">
+                <a href="{{ url_for('resumes.upload_view') }}" class="btn-custom btn-primary-custom btn-lg-custom w-100 justify-content-center">
+                    <i class="bi bi-cloud-upload"></i> 上传简历
                 </a>
-                <a href="{{ url_for('jobs.create_view') }}" class="btn btn-success">
-                    <i class="bi bi-plus-circle me-1"></i>发布职位
+                <a href="{{ url_for('jobs.create_view') }}" class="btn-custom btn-accent btn-lg-custom w-100 justify-content-center">
+                    <i class="bi bi-plus-circle"></i> 发布新职位
                 </a>
-                <a href="{{ url_for('search.search_view') }}" class="btn btn-warning">
-                    <i class="bi bi-search me-1"></i>智能搜索
+                <a href="{{ url_for('search.search_view') }}" class="btn-custom btn-outline-custom btn-lg-custom w-100 justify-content-center">
+                    <i class="bi bi-search"></i> 智能匹配候选人
                 </a>
+                <hr>
+                <div class="small text-muted">
+                    <i class="bi bi-wifi me-1"></i> 局域网地址：<strong>{{ local_ip }}:{{ port }}</strong>
+                </div>
             </div>
         </div>
     </div>
 </div>
+{% endblock %}
 
-<!-- 最近动态 -->
-<div class="row g-4">
-    <div class="col-lg-6">
-        <div class="card border-0 shadow-sm h-100">
-            <div class="card-header bg-white border-bottom d-flex justify-content-between align-items-center">
-                <h5 class="mb-0 fw-bold"><i class="bi bi-file-earmark-person me-2"></i>最近上传的简历</h5>
-                <a href="{{ url_for('resumes.list_view') }}" class="btn btn-sm btn-outline-primary">查看全部</a>
-            </div>
-            <div class="card-body p-0">
-                {% if recent_resumes %}
-                <div class="list-group list-group-flush">
-                    {% for resume in recent_resumes %}
-                    <a href="{{ url_for('resumes.detail_view', resume_id=resume.id) }}" class="list-group-item list-group-item-action">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <div>
-                                <strong>{{ resume.name or '未命名' }}</strong>
-                                <span class="text-muted ms-2 small">{{ resume.education or '' }} {{ resume.major or '' }}</span>
-                            </div>
-                            <small class="text-muted">{{ resume.created_at[:10] if resume.created_at else '' }}</small>
-                        </div>
-                    </a>
-                    {% endfor %}
-                </div>
-                {% else %}
-                <div class="text-center py-4 text-muted">
-                    <i class="bi bi-inbox fs-1"></i>
-                    <p class="mt-2">暂无简历，<a href="{{ url_for('resumes.upload_view') }}">上传第一份简历</a></p>
-                </div>
-                {% endif %}
-            </div>
-        </div>
-    </div>
-    <div class="col-lg-6">
-        <div class="card border-0 shadow-sm h-100">
-            <div class="card-header bg-white border-bottom d-flex justify-content-between align-items-center">
-                <h5 class="mb-0 fw-bold"><i class="bi bi-briefcase me-2"></i>最近发布的职位</h5>
-                <a href="{{ url_for('jobs.list_view') }}" class="btn btn-sm btn-outline-primary">查看全部</a>
-            </div>
-            <div class="card-body p-0">
-                {% if recent_jobs %}
-                <div class="list-group list-group-flush">
-                    {% for job in recent_jobs %}
-                    <a href="{{ url_for('jobs.detail_view', job_id=job.id) }}" class="list-group-item list-group-item-action">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <div>
-                                <strong>{{ job.title }}</strong>
-                                <span class="badge bg-{{ 'success' if job.status == '招聘中' else 'secondary' }} ms-2">{{ job.status }}</span>
-                                {% if job.salary_min or job.salary_max %}
-                                <span class="text-danger ms-2 small">{{ job.salary_min }}-{{ job.salary_max }}K</span>
-                                {% endif %}
-                            </div>
-                            <small class="text-muted">{{ job.created_at[:10] if job.created_at else '' }}</small>
-                        </div>
-                    </a>
-                    {% endfor %}
-                </div>
-                {% else %}
-                <div class="text-center py-4 text-muted">
-                    <i class="bi bi-inbox fs-1"></i>
-                    <p class="mt-2">暂无职位，<a href="{{ url_for('jobs.create_view') }}">发布第一个职位</a></p>
-                </div>
-                {% endif %}
-            </div>
-        </div>
-    </div>
-</div>
+{% block extra_js %}
+<script>
+// 图表已在 main.js 的 initDashboardCharts() 中初始化
+</script>
 {% endblock %}

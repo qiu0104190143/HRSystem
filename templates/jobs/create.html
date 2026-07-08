@@ -1,123 +1,125 @@
 {% extends "base.html" %}
-{% block title %}{{ '编辑职位' if job and job.id else '发布职位' }} - HR招聘管理系统{% endblock %}
+{% block title %}{{ '编辑职位' if job and job.id else '发布新职位' }} - HR招聘管理系统{% endblock %}
+
+{% block breadcrumb %}
+<span><i class="bi bi-briefcase-fill me-1"></i> 职位管理</span>
+<span class="text-muted">/</span>
+<span>{{ '编辑' if job and job.id else '发布新职位' }}</span>
+{% endblock %}
 
 {% block content %}
-<div class="mb-4">
-    {% if job and job.id %}
-    <a href="{{ url_for('jobs.detail_view', job_id=job.id) }}" class="btn btn-sm btn-outline-secondary mb-3">
-        <i class="bi bi-arrow-left me-1"></i>返回详情
-    </a>
-    <h2 class="fw-bold"><i class="bi bi-pencil me-2"></i>编辑职位</h2>
-    {% else %}
-    <h2 class="fw-bold"><i class="bi bi-plus-circle me-2"></i>发布新职位</h2>
-    <p class="text-muted">填写职位信息并发布</p>
-    {% endif %}
-</div>
-
-<div class="row">
+<div class="row g-4 fade-in">
     <div class="col-lg-8">
-        <div class="card border-0 shadow-sm">
-            <div class="card-body">
+        <div class="panel">
+            <div class="panel-header">
+                <div class="panel-title"><i class="bi bi-{{ 'pencil' if job and job.id else 'plus-circle' }}"></i> {{ '编辑职位信息' if job and job.id else '填写职位信息' }}</div>
+            </div>
+            <div class="panel-body">
                 <form method="POST">
-                    <div class="row g-3">
-                        <div class="col-sm-8">
-                            <label class="form-label">职位名称 <span class="text-danger">*</span></label>
-                            <input type="text" name="title" class="form-control form-control-lg" value="{{ job.title if job else '' }}" placeholder="例：高级Python开发工程师" required>
+                    <!-- 基本信息 -->
+                    <div class="form-section">
+                        <div class="form-section-title"><i class="bi bi-info-circle text-primary"></i> 基本信息</div>
+                        <div class="form-row">
+                            <div>
+                                <label class="form-label-custom">职位名称 <span class="text-danger">*</span></label>
+                                <input type="text" name="title" class="form-control-custom" value="{{ job.title if job else '' }}" placeholder="如：高级Python开发工程师" required>
+                            </div>
+                            <div>
+                                <label class="form-label-custom">所属部门</label>
+                                <input type="text" name="department" class="form-control-custom" value="{{ job.department if job else '' }}" placeholder="如：技术部">
+                            </div>
                         </div>
-                        <div class="col-sm-4">
-                            <label class="form-label">部门</label>
-                            <input type="text" name="department" class="form-control form-control-lg" value="{{ job.department if job else '' }}" placeholder="例：技术部">
-                        </div>
-                        <div class="col-sm-6">
-                            <label class="form-label">最低薪资（K/月）</label>
-                            <input type="number" name="salary_min" class="form-control" value="{{ job.salary_min if job and job.salary_min else '' }}" placeholder="例：15" min="0">
-                        </div>
-                        <div class="col-sm-6">
-                            <label class="form-label">最高薪资（K/月）</label>
-                            <input type="number" name="salary_max" class="form-control" value="{{ job.salary_max if job and job.salary_max else '' }}" placeholder="例：25" min="0">
-                        </div>
-                        <div class="col-sm-4">
-                            <label class="form-label">学历要求</label>
-                            <select name="education_required" class="form-select">
-                                <option value="">不限</option>
-                                {% for edu in ['高中', '中专', '大专', '本科', '硕士', '博士'] %}
-                                <option value="{{ edu }}" {{ 'selected' if job and job.education_required == edu }}>{{ edu }}</option>
-                                {% endfor %}
-                            </select>
-                        </div>
-                        <div class="col-sm-4">
-                            <label class="form-label">经验要求（年）</label>
-                            <input type="number" name="experience_required" class="form-control" value="{{ job.experience_required if job and job.experience_required else '' }}" placeholder="例：3" min="0">
-                        </div>
-                        <div class="col-sm-2">
-                            <label class="form-label">年龄下限</label>
-                            <input type="number" name="age_min" class="form-control" value="{{ job.age_min if job and job.age_min else '' }}" placeholder="25" min="18">
-                        </div>
-                        <div class="col-sm-2">
-                            <label class="form-label">年龄上限</label>
-                            <input type="number" name="age_max" class="form-control" value="{{ job.age_max if job and job.age_max else '' }}" placeholder="40" min="18">
-                        </div>
-                        <div class="col-12">
-                            <label class="form-label">技能要求</label>
-                            <input type="text" name="skills_required" class="form-control" value="{{ job.skills_required if job else '' }}" placeholder="例：Python，Java，MySQL，Docker（用逗号分隔）">
-                            <small class="text-muted">用逗号、中文逗号或空格分隔多个技能</small>
-                        </div>
-                        <div class="col-12">
-                            <label class="form-label">职位描述/岗位职责</label>
-                            <textarea name="description" class="form-control" rows="5" placeholder="描述该岗位的主要工作内容和职责">{{ job.description if job else '' }}</textarea>
-                        </div>
-                        <div class="col-12">
-                            <label class="form-label">任职要求</label>
-                            <textarea name="requirements" class="form-control" rows="5" placeholder="详细列出应聘者需要具备的条件">{{ job.requirements if job else '' }}</textarea>
-                        </div>
-                        {% if job and job.id %}
-                        <div class="col-sm-6">
-                            <label class="form-label">状态</label>
-                            <select name="status" class="form-select">
-                                <option value="招聘中" {{ 'selected' if job.status == '招聘中' }}>招聘中</option>
-                                <option value="已关闭" {{ 'selected' if job.status == '已关闭' }}>已关闭</option>
-                            </select>
-                        </div>
-                        {% endif %}
                     </div>
-                    <div class="mt-4 d-flex gap-2">
-                        <button type="submit" class="btn btn-success btn-lg">
-                            <i class="bi bi-check-circle me-1"></i>{{ '保存修改' if job and job.id else '发布职位' }}
+
+                    <!-- 薪资与要求 -->
+                    <div class="form-section">
+                        <div class="form-section-title"><i class="bi bi-cash text-primary"></i> 薪资与硬性要求</div>
+                        <div class="form-row cols-4">
+                            <div>
+                                <label class="form-label-custom">最低薪资(K)</label>
+                                <input type="number" name="salary_min" class="form-control-custom" value="{{ job.salary_min if job and job.salary_min else '' }}" placeholder="例：15">
+                            </div>
+                            <div>
+                                <label class="form-label-custom">最高薪资(K)</label>
+                                <input type="number" name="salary_max" class="form-control-custom" value="{{ job.salary_max if job and job.salary_max else '' }}" placeholder="例：25">
+                            </div>
+                            <div>
+                                <label class="form-label-custom">学历要求</label>
+                                <select name="education_required" class="form-control-custom">
+                                    <option value="">不限</option>
+                                    {% for edu in ['高中','中专','大专','本科','硕士','博士'] %}
+                                    <option value="{{ edu }}" {{ 'selected' if job and job.education_required == edu }}>{{ edu }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div>
+                                <label class="form-label-custom">经验要求(年)</label>
+                                <input type="number" name="experience_required" class="form-control-custom" value="{{ job.experience_required if job and job.experience_required else '' }}" placeholder="例：3">
+                            </div>
+                            <div>
+                                <label class="form-label-custom">年龄下限</label>
+                                <input type="number" name="age_min" class="form-control-custom" value="{{ job.age_min if job and job.age_min else '' }}" placeholder="不限">
+                            </div>
+                            <div>
+                                <label class="form-label-custom">年龄上限</label>
+                                <input type="number" name="age_max" class="form-control-custom" value="{{ job.age_max if job and job.age_max else '' }}" placeholder="不限">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 技能与描述 -->
+                    <div class="form-section">
+                        <div class="form-section-title"><i class="bi bi-tools text-primary"></i> 技能要求</div>
+                        <div>
+                            <label class="form-label-custom">所需技能（逗号或空格分隔）</label>
+                            <input type="text" name="skills_required" class="form-control-custom" value="{{ job.skills_required if job else '' }}" placeholder="如：Python，MySQL，Docker，Kubernetes">
+                            <small class="text-muted">越详细越好，系统会根据技能匹配候选人</small>
+                        </div>
+                    </div>
+
+                    <div class="form-section">
+                        <div class="form-section-title"><i class="bi bi-journal-text text-primary"></i> 职位详情</div>
+                        <div class="mb-3">
+                            <label class="form-label-custom">岗位职责</label>
+                            <textarea name="description" class="form-control-custom" rows="4" placeholder="描述该岗位的主要工作内容和职责...">{{ job.description if job else '' }}</textarea>
+                        </div>
+                        <div>
+                            <label class="form-label-custom">任职要求</label>
+                            <textarea name="requirements" class="form-control-custom" rows="4" placeholder="详细列出应聘者需要具备的条件...">{{ job.requirements if job else '' }}</textarea>
+                        </div>
+                    </div>
+
+                    {% if job and job.id %}
+                    <div class="form-section">
+                        <div class="form-section-title"><i class="bi bi-toggles text-primary"></i> 状态</div>
+                        <select name="status" class="form-control-custom" style="max-width:200px;">
+                            <option value="招聘中" {{ 'selected' if job.status == '招聘中' }}>招聘中</option>
+                            <option value="已关闭" {{ 'selected' if job.status == '已关闭' }}>已关闭</option>
+                        </select>
+                    </div>
+                    {% endif %}
+
+                    <div class="d-flex gap-3 mt-4 pt-3 border-top">
+                        <button type="submit" class="btn-custom btn-primary-custom btn-lg-custom">
+                            <i class="bi bi-check-circle me-1"></i> {{ '保存修改' if job and job.id else '发布职位' }}
                         </button>
-                        {% if job and job.id %}
-                        <a href="{{ url_for('jobs.detail_view', job_id=job.id) }}" class="btn btn-outline-secondary btn-lg">取消</a>
-                        {% else %}
-                        <a href="{{ url_for('jobs.list_view') }}" class="btn btn-outline-secondary btn-lg">取消</a>
-                        {% endif %}
+                        <a href="{{ url_for('jobs.detail_view', job_id=job.id) if job and job.id else url_for('jobs.list_view') }}" class="btn-custom btn-outline-custom btn-lg-custom">取消</a>
                     </div>
                 </form>
             </div>
         </div>
     </div>
+
     <div class="col-lg-4">
-        <div class="card border-0 shadow-sm">
-            <div class="card-header bg-white border-bottom">
-                <h5 class="mb-0 fw-bold">💡 填写提示</h5>
+        <div class="panel">
+            <div class="panel-header">
+                <div class="panel-title"><i class="bi bi-lightbulb"></i> 填写要点</div>
             </div>
-            <div class="card-body">
-                <ul class="list-unstyled mb-0">
-                    <li class="mb-3">
-                        <i class="bi bi-1-circle text-primary me-2"></i>
-                        <strong>职位名称</strong>要清晰明确，方便求职者理解
-                    </li>
-                    <li class="mb-3">
-                        <i class="bi bi-2-circle text-primary me-2"></i>
-                        <strong>技能要求</strong>越详细越好，系统会根据技能匹配候选人
-                    </li>
-                    <li class="mb-3">
-                        <i class="bi bi-3-circle text-primary me-2"></i>
-                        <strong>职位描述</strong>写得越详细，智能匹配越准确
-                    </li>
-                    <li>
-                        <i class="bi bi-4-circle text-primary me-2"></i>
-                        <strong>年龄和学历</strong>设为"不限"可以扩大候选人范围
-                    </li>
-                </ul>
+            <div class="panel-body" style="line-height:2.2;">
+                <p><i class="bi bi-1-circle-fill text-primary me-2"></i> <strong>职位名称</strong>清晰具体</p>
+                <p><i class="bi bi-2-circle-fill text-primary me-2"></i> <strong>技能要求</strong>是匹配算法的核心依据</p>
+                <p><i class="bi bi-3-circle-fill text-primary me-2"></i> <strong>岗位描述</strong>越详细，文本匹配越准确</p>
+                <p><i class="bi bi-4-circle-fill text-primary me-2"></i> <strong>年龄/学历</strong>设"不限"可扩大候选人范围</p>
             </div>
         </div>
     </div>

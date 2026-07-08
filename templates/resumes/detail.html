@@ -1,141 +1,105 @@
 {% extends "base.html" %}
 {% block title %}{{ resume.name or '简历详情' }} - HR招聘管理系统{% endblock %}
 
+{% block breadcrumb %}
+<span><i class="bi bi-people-fill me-1"></i> 简历库</span>
+<span class="text-muted">/</span>
+<span>{{ resume.name or '未命名' }}</span>
+{% endblock %}
+
 {% block content %}
-<div class="mb-4">
-    <a href="{{ url_for('resumes.list_view') }}" class="btn btn-sm btn-outline-secondary mb-3">
-        <i class="bi bi-arrow-left me-1"></i>返回列表
-    </a>
-    <div class="d-flex justify-content-between align-items-center">
-        <h2 class="fw-bold mb-0"><i class="bi bi-file-earmark-person me-2"></i>{{ resume.name or '未命名简历' }}</h2>
-        <div class="btn-group">
-            <a href="{{ url_for('resumes.edit_view', resume_id=resume.id) }}" class="btn btn-warning">
-                <i class="bi bi-pencil me-1"></i>编辑
-            </a>
-            <button type="button" class="btn btn-danger" onclick="confirmDelete('{{ url_for('resumes.delete_view', resume_id=resume.id) }}', '{{ resume.name or '未命名' }}')">
-                <i class="bi bi-trash me-1"></i>删除
-            </button>
-        </div>
+<div class="d-flex justify-content-between align-items-center mb-4 fade-in">
+    <div>
+        <h3 class="fw-bold mb-1">{{ resume.name or '未命名简历' }}</h3>
+        <p class="text-muted mb-0">{{ resume.current_position or '' }}{{ ' @ ' + resume.current_company if resume.current_company else '' }}</p>
+    </div>
+    <div class="d-flex gap-2">
+        <a href="{{ url_for('resumes.edit_view', resume_id=resume.id) }}" class="btn-custom btn-outline-custom">
+            <i class="bi bi-pencil me-1"></i> 编辑
+        </a>
+        <button onclick="confirmDeleteModal('{{ url_for('resumes.delete_view', resume_id=resume.id) }}', '{{ resume.name or '未命名' }}')"
+                class="btn-custom btn-danger-custom">
+            <i class="bi bi-trash me-1"></i> 删除
+        </button>
     </div>
 </div>
 
-<div class="row g-4">
-    <!-- 基本信息 -->
-    <div class="col-lg-8">
-        <div class="card border-0 shadow-sm">
-            <div class="card-header bg-white border-bottom">
-                <h5 class="mb-0 fw-bold">📋 基本信息</h5>
+<div class="detail-grid fade-in">
+    <!-- 左侧：详细信息 -->
+    <div>
+        <!-- 基本信息 -->
+        <div class="panel mb-4">
+            <div class="panel-header">
+                <div class="panel-title"><i class="bi bi-person-badge"></i> 基本信息</div>
             </div>
-            <div class="card-body">
-                <div class="row g-3">
-                    <div class="col-sm-6">
-                        <label class="text-muted small">姓名</label>
-                        <p class="fw-bold">{{ resume.name or '-' }}</p>
+            <div class="panel-body">
+                <div class="info-grid">
+                    <div class="info-item"><label>姓名</label><span>{{ resume.name or '-' }}</span></div>
+                    <div class="info-item"><label>性别</label><span>{{ resume.gender or '-' }}</span></div>
+                    <div class="info-item"><label>年龄</label><span>{{ resume.age if resume.age else '-' }}</span></div>
+                    <div class="info-item"><label>学历</label>
+                        <span>{% if resume.education %}<span class="badge-custom badge-primary">{{ resume.education }}</span>{% else %}-{% endif %}</span>
                     </div>
-                    <div class="col-sm-6">
-                        <label class="text-muted small">性别</label>
-                        <p>{{ resume.gender or '-' }}</p>
-                    </div>
-                    <div class="col-sm-6">
-                        <label class="text-muted small">年龄</label>
-                        <p>{{ resume.age if resume.age else '-' }}</p>
-                    </div>
-                    <div class="col-sm-6">
-                        <label class="text-muted small">学历</label>
-                        <p>
-                            {% if resume.education %}
-                            <span class="badge bg-info fs-6">{{ resume.education }}</span>
-                            {% else %}
-                            -
-                            {% endif %}
-                        </p>
-                    </div>
-                    <div class="col-sm-6">
-                        <label class="text-muted small">电话</label>
-                        <p>{{ resume.phone or '-' }}</p>
-                    </div>
-                    <div class="col-sm-6">
-                        <label class="text-muted small">邮箱</label>
-                        <p>{{ resume.email or '-' }}</p>
-                    </div>
-                    <div class="col-sm-6">
-                        <label class="text-muted small">毕业院校</label>
-                        <p>{{ resume.school or '-' }}</p>
-                    </div>
-                    <div class="col-sm-6">
-                        <label class="text-muted small">专业</label>
-                        <p>{{ resume.major or '-' }}</p>
-                    </div>
-                    <div class="col-sm-6">
-                        <label class="text-muted small">工作经验</label>
-                        <p>{{ (resume.experience_years|string + ' 年') if resume.experience_years else '-' }}</p>
-                    </div>
-                    <div class="col-sm-6">
-                        <label class="text-muted small">当前公司</label>
-                        <p>{{ resume.current_company or '-' }}</p>
-                    </div>
-                    <div class="col-sm-6">
-                        <label class="text-muted small">当前职位</label>
-                        <p>{{ resume.current_position or '-' }}</p>
-                    </div>
-                    <div class="col-sm-6">
-                        <label class="text-muted small">上传时间</label>
-                        <p>{{ resume.created_at or '-' }}</p>
-                    </div>
-                    <div class="col-12">
-                        <label class="text-muted small">技能标签</label>
-                        <p>
-                            {% if resume.skills %}
-                            {% for skill in resume.skills.replace('，', ',').split(',') %}
-                            <span class="badge bg-primary me-1">{{ skill.strip() }}</span>
-                            {% endfor %}
-                            {% else %}
-                            -
-                            {% endif %}
-                        </p>
+                    <div class="info-item"><label>电话</label><span>{{ resume.phone or '-' }}</span></div>
+                    <div class="info-item"><label>邮箱</label><span>{{ resume.email or '-' }}</span></div>
+                    <div class="info-item"><label>毕业院校</label><span>{{ resume.school or '-' }}</span></div>
+                    <div class="info-item"><label>专业</label><span>{{ resume.major or '-' }}</span></div>
+                    <div class="info-item"><label>工作经验</label><span>{{ (resume.experience_years|string + ' 年') if resume.experience_years else '-' }}</span></div>
+                    <div class="info-item"><label>当前公司</label><span>{{ resume.current_company or '-' }}</span></div>
+                    <div class="info-item"><label>当前职位</label><span>{{ resume.current_position or '-' }}</span></div>
+                    <div class="info-item"><label>上传时间</label><span style="font-size:13px;">{{ resume.created_at or '-' }}</span></div>
+                </div>
+
+                {% if resume.skills %}
+                <div class="detail-section mt-3">
+                    <h6>技能标签</h6>
+                    <div>
+                        {% for skill in resume.skills.replace('，', ',').split(',') %}
+                        <span class="badge-custom badge-purple me-1 mb-1">{{ skill.strip() }}</span>
+                        {% endfor %}
                     </div>
                 </div>
+                {% endif %}
             </div>
         </div>
 
         <!-- 简历原文 -->
         {% if resume.content_text %}
-        <div class="card border-0 shadow-sm mt-4">
-            <div class="card-header bg-white border-bottom">
-                <h5 class="mb-0 fw-bold">📄 简历原文内容</h5>
+        <div class="panel">
+            <div class="panel-header">
+                <div class="panel-title"><i class="bi bi-file-text"></i> 简历原文</div>
             </div>
-            <div class="card-body">
-                <pre class="resume-content bg-light p-3 rounded">{{ resume.content_text }}</pre>
+            <div class="panel-body">
+                <pre class="resume-content bg-light p-3 rounded" style="max-height:500px;overflow-y:auto;white-space:pre-wrap;font-size:13px;line-height:1.8;">{{ resume.content_text }}</pre>
             </div>
         </div>
         {% endif %}
     </div>
 
-    <!-- 侧边栏 -->
-    <div class="col-lg-4">
-        <div class="card border-0 shadow-sm">
-            <div class="card-header bg-white border-bottom">
-                <h5 class="mb-0 fw-bold">📁 文件信息</h5>
+    <!-- 右侧：文件信息 -->
+    <div>
+        <div class="panel mb-4">
+            <div class="panel-header">
+                <div class="panel-title"><i class="bi bi-folder"></i> 文件信息</div>
             </div>
-            <div class="card-body">
-                <p><strong>文件类型：</strong>{{ resume.file_type or '-' }}</p>
-                <p><strong>上传时间：</strong>{{ resume.created_at or '-' }}</p>
+            <div class="panel-body">
+                <div class="info-item mb-3"><label>文件类型</label><span><span class="badge-custom badge-info">{{ resume.file_type or '-' }}</span></span></div>
+                <div class="info-item mb-3"><label>上传时间</label><span style="font-size:13px;">{{ resume.created_at or '-' }}</span></div>
+            </div>
+        </div>
+
+        <div class="panel">
+            <div class="panel-header">
+                <div class="panel-title"><i class="bi bi-lightbulb"></i> 提示</div>
+            </div>
+            <div class="panel-body">
+                <p class="small text-muted mb-0">
+                    如果自动解析的信息与简历原文有出入，请点击"编辑"按钮手动修正。更多字段可以后续补充。
+                </p>
             </div>
         </div>
     </div>
 </div>
 
-<form id="deleteForm" method="POST" style="display: none;"></form>
-{% endblock %}
-
-{% block extra_js %}
-<script>
-function confirmDelete(url, name) {
-    if (confirm('确定要删除简历 "' + name + '" 吗？此操作不可恢复。')) {
-        var form = document.getElementById('deleteForm');
-        form.action = url;
-        form.submit();
-    }
-}
-</script>
+<form id="deleteForm" method="POST" style="display:none;"></form>
 {% endblock %}

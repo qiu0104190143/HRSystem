@@ -7,7 +7,14 @@ from modules.models import (
 )
 from modules.resume_parser import parse_resume
 
+from modules.auth import login_required
+
 resume_bp = Blueprint('resumes', __name__, url_prefix='/resumes')
+
+@resume_bp.before_request
+@login_required
+def before_request():
+    pass
 
 ALLOWED_EXTENSIONS = {'txt', 'docx', 'pdf'}
 

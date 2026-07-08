@@ -2,8 +2,14 @@
 from flask import Blueprint, render_template, request
 from modules.models import get_all_resumes, get_job_by_id, get_all_jobs_simple
 from modules.matcher import match_resumes_to_job
+from modules.auth import login_required
 
 search_bp = Blueprint('search', __name__, url_prefix='/search')
+
+@search_bp.before_request
+@login_required
+def before_request():
+    pass
 
 
 @search_bp.route('/', methods=['GET', 'POST'])

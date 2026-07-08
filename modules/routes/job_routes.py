@@ -6,7 +6,14 @@ from modules.models import (
 )
 from modules.matcher import match_resumes_to_job
 
+from modules.auth import login_required
+
 job_bp = Blueprint('jobs', __name__, url_prefix='/jobs')
+
+@job_bp.before_request
+@login_required
+def before_request():
+    pass
 
 
 @job_bp.route('/')

@@ -1,10 +1,16 @@
 """统计数据API模块 — 为前端图表提供数据"""
 from flask import Blueprint, jsonify
 from modules.models import get_db
+from modules.auth import login_required
 from collections import Counter
 from datetime import datetime, timedelta
 
 stats_bp = Blueprint('stats', __name__, url_prefix='/api/stats')
+
+@stats_bp.before_request
+@login_required
+def before_request():
+    pass
 
 
 @stats_bp.route('/dashboard')

@@ -2,7 +2,8 @@
   "permissions": {
     "allow": [
       "Bash(GIT_TRACE=1 git push -u origin main)",
-      "Bash(ssh -o StrictHostKeyChecking=no -T git@github.com)"
+      "Bash(ssh -o StrictHostKeyChecking=no -T git@github.com)",
+      "Bash(git commit -m '全面UI升级 v2.0 — 专业侧边栏布局 + 图表仪表盘 + 增强匹配 *)"
     ]
   }
 }

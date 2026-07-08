@@ -2,7 +2,7 @@
 import os
 import sys
 import io
-from flask import Flask, render_template
+from flask import Flask, render_template, session
 
 # 解决Windows控制台中文乱码问题
 if sys.platform == 'win32':
@@ -12,11 +12,12 @@ if sys.platform == 'win32':
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from config import DATABASE_PATH, UPLOAD_FOLDER, SECRET_KEY, DEBUG, HOST, PORT
-from modules.models import init_db, get_resume_count, get_job_count, get_active_job_count, get_week_resume_count, get_recent_resumes, get_recent_jobs
+from modules.models import init_db, create_default_admin, get_user_by_id, get_resume_count, get_job_count, get_active_job_count, get_week_resume_count, get_recent_resumes, get_recent_jobs
 from modules.routes.resume_routes import resume_bp
 from modules.routes.job_routes import job_bp
 from modules.routes.search_routes import search_bp
 from modules.stats import stats_bp
+from modules.auth import auth_bp, login_required
 from utils.helpers import get_local_ip
 
 
@@ -33,8 +34,10 @@ def create_app():
 
     # 初始化数据库
     init_db()
+    create_default_admin()
 
     # 注册蓝图
+    app.register_blueprint(auth_bp)
     app.register_blueprint(resume_bp)
     app.register_blueprint(job_bp)
     app.register_blueprint(search_bp)
@@ -43,13 +46,18 @@ def create_app():
     # 全局上下文：所有模板可用的变量
     @app.context_processor
     def inject_globals():
+        user = None
+        if 'user_id' in session:
+            user = get_user_by_id(session['user_id'])
         return {
             'local_ip': get_local_ip(),
             'port': PORT,
+            'current_user': user,
         }
 
     # 首页路由
     @app.route('/')
+    @login_required
     def index():
         stats = {
             'resume_count': get_resume_count(),

@@ -63,8 +63,56 @@ def init_db():
         )
     ''')
 
+    # 用户表
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS users (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            username TEXT UNIQUE NOT NULL,
+            password_hash TEXT NOT NULL,
+            display_name TEXT DEFAULT '',
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        )
+    ''')
+
     conn.commit()
     conn.close()
+
+
+def create_default_admin():
+    """创建默认管理员账号（如果不存在）"""
+    from werkzeug.security import generate_password_hash
+    conn = get_db()
+    existing = conn.execute(
+        'SELECT id FROM users WHERE username = ?', ('admin',)
+    ).fetchone()
+    if not existing:
+        conn.execute(
+            'INSERT INTO users (username, password_hash, display_name) VALUES (?, ?, ?)',
+            ('admin', generate_password_hash('admin123'), '系统管理员')
+        )
+        conn.commit()
+    conn.close()
+
+
+def verify_user(username, password):
+    """验证用户名密码，成功返回用户信息，失败返回None"""
+    from werkzeug.security import check_password_hash
+    conn = get_db()
+    user = conn.execute(
+        'SELECT * FROM users WHERE username = ?', (username,)
+    ).fetchone()
+    conn.close()
+    if user and check_password_hash(user['password_hash'], password):
+        return dict(user)
+    return None
+
+
+def get_user_by_id(user_id):
+    """根据ID获取用户"""
+    conn = get_db()
+    user = conn.execute('SELECT * FROM users WHERE id = ?', (user_id,)).fetchone()
+    conn.close()
+    return dict(user) if user else None
 
 
 # ========== 简历 CRUD 操作 ==========

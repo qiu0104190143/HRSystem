@@ -44,7 +44,7 @@ def _ai_parse(text):
         api_url = get_setting('ai_api_url', 'https://api.deepseek.com/v1/chat/completions')
         model = get_setting('ai_model', 'deepseek-chat')
 
-        if not api_key or not api_key.startswith('sk-'):
+        if not api_key:
             return None  # API Key未配置，回退规则解析
     except Exception:
         return None

@@ -27,7 +27,7 @@ def settings_view():
     config = {
         'ai_api_key': get_setting('ai_api_key', ''),
         'ai_api_url': get_setting('ai_api_url', 'https://api.deepseek.com/v1/chat/completions'),
-        'ai_model': get_setting('ai_model', 'deepseek-chat'),
+        'ai_model': get_setting('ai_model', ''),
     }
     # 隐藏API Key中间部分
     masked_key = ''

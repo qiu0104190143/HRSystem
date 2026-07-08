@@ -26,22 +26,21 @@
                             {% if masked_key %}
                             <small class="text-muted">当前：{{ masked_key }}</small>
                             {% else %}
-                            <small class="text-muted">请输入DeepSeek API Key，用于AI智能解析简历</small>
+                            <small class="text-muted">请输入API Key，用于AI智能解析简历（支持OpenAI/DeepSeek/Ollama等兼容接口）</small>
                             {% endif %}
                         </div>
                         <div class="mb-4">
                             <label class="form-label-custom">API 地址</label>
                             <input type="text" name="ai_api_url" class="form-control-custom"
                                    value="{{ config.ai_api_url }}" placeholder="https://api.deepseek.com/v1/chat/completions">
-                            <small class="text-muted">DeepSeek默认地址，一般无需修改</small>
+                            <small class="text-muted">支持兼容OpenAI接口的任意服务商（DeepSeek/OpenAI/Ollama/硅基流动等）</small>
                         </div>
                         <div class="mb-4">
-                            <label class="form-label-custom">模型</label>
-                            <select name="ai_model" class="form-control-custom" style="max-width:300px;">
-                                <option value="deepseek-chat" {{ 'selected' if config.ai_model == 'deepseek-chat' }}>deepseek-chat（推荐）</option>
-                                <option value="deepseek-reasoner" {{ 'selected' if config.ai_model == 'deepseek-reasoner' }}>deepseek-reasoner（深度推理）</option>
-                            </select>
-                            <small class="text-muted">deepseek-chat 速度快成本低，适合简历解析</small>
+                            <label class="form-label-custom">模型名称</label>
+                            <input type="text" name="ai_model" class="form-control-custom"
+                                   value="{{ config.ai_model }}" placeholder="如：deepseek-chat / gpt-4o-mini / qwen2.5:7b"
+                                   style="max-width:400px;">
+                            <small class="text-muted">可自由填写任意模型名，切换供应商时只需修改此处和API地址</small>
                         </div>
                         <button type="submit" class="btn-custom btn-primary-custom btn-lg-custom">
                             <i class="bi bi-check-circle me-1"></i> 保存设置
@@ -82,13 +81,20 @@
 
             <div class="panel">
                 <div class="panel-header">
-                    <div class="panel-title"><i class="bi bi-question-circle"></i> 如何获取API Key？</div>
+                    <div class="panel-title"><i class="bi bi-question-circle"></i> 常见模型供应商配置</div>
                 </div>
-                <div class="panel-body small" style="line-height:1.9;">
-                    <p>1. 打开 <a href="https://platform.deepseek.com" target="_blank">platform.deepseek.com</a> 注册账号</p>
-                    <p>2. 进入「API Keys」页面，点击「创建API Key」</p>
-                    <p>3. 复制生成的 <code>sk-xxxx</code> 粘贴到左侧输入框</p>
-                    <p>4. 新用户通常有免费额度，之后按使用量计费（约1元/百万token）</p>
+                <div class="panel-body small" style="line-height:2;">
+                    <p class="fw-bold mb-1">DeepSeek（推荐）</p>
+                    <p class="text-muted mb-2">API地址：<code>https://api.deepseek.com/v1/chat/completions</code><br>模型：<code>deepseek-chat</code><br><a href="https://platform.deepseek.com" target="_blank">获取API Key →</a></p>
+                    <hr>
+                    <p class="fw-bold mb-1">OpenAI</p>
+                    <p class="text-muted mb-2">API地址：<code>https://api.openai.com/v1/chat/completions</code><br>模型：<code>gpt-4o-mini</code> 或 <code>gpt-4o</code></p>
+                    <hr>
+                    <p class="fw-bold mb-1">Ollama（本地免费）</p>
+                    <p class="text-muted mb-2">API地址：<code>http://localhost:11434/v1/chat/completions</code><br>模型：<code>qwen2.5:7b</code> 或 <code>llama3:8b</code><br>API Key可填任意值（如 <code>ollama</code>）</p>
+                    <hr>
+                    <p class="fw-bold mb-1">其他兼容接口</p>
+                    <p class="text-muted">硅基流动、智谱、百川等，只要兼容OpenAI接口格式即可使用</p>
                 </div>
             </div>
         </div>

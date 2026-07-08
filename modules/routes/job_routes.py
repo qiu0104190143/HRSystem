@@ -10,6 +10,15 @@ from modules.auth import login_required
 
 job_bp = Blueprint('jobs', __name__, url_prefix='/jobs')
 
+
+def _parse_int(val):
+    """安全地将字符串转为整数，空值返回0"""
+    try:
+        return int(val) if val else 0
+    except (ValueError, TypeError):
+        return 0
+
+
 @job_bp.before_request
 @login_required
 def before_request():
@@ -34,12 +43,12 @@ def create_view():
         data = {
             'title': request.form.get('title', ''),
             'department': request.form.get('department', ''),
-            'salary_min': int(request.form.get('salary_min', 0)),
-            'salary_max': int(request.form.get('salary_max', 0)),
+            'salary_min': _parse_int(request.form.get('salary_min', '')),
+            'salary_max': _parse_int(request.form.get('salary_max', '')),
             'education_required': request.form.get('education_required', ''),
-            'experience_required': int(request.form.get('experience_required', 0)),
-            'age_min': int(request.form.get('age_min', 0)),
-            'age_max': int(request.form.get('age_max', 0)),
+            'experience_required': _parse_int(request.form.get('experience_required', '')),
+            'age_min': _parse_int(request.form.get('age_min', '')),
+            'age_max': _parse_int(request.form.get('age_max', '')),
             'skills_required': request.form.get('skills_required', ''),
             'description': request.form.get('description', ''),
             'requirements': request.form.get('requirements', ''),
@@ -86,12 +95,12 @@ def edit_view(job_id):
         data = {
             'title': request.form.get('title', ''),
             'department': request.form.get('department', ''),
-            'salary_min': int(request.form.get('salary_min', 0)),
-            'salary_max': int(request.form.get('salary_max', 0)),
+            'salary_min': _parse_int(request.form.get('salary_min', '')),
+            'salary_max': _parse_int(request.form.get('salary_max', '')),
             'education_required': request.form.get('education_required', ''),
-            'experience_required': int(request.form.get('experience_required', 0)),
-            'age_min': int(request.form.get('age_min', 0)),
-            'age_max': int(request.form.get('age_max', 0)),
+            'experience_required': _parse_int(request.form.get('experience_required', '')),
+            'age_min': _parse_int(request.form.get('age_min', '')),
+            'age_max': _parse_int(request.form.get('age_max', '')),
             'skills_required': request.form.get('skills_required', ''),
             'description': request.form.get('description', ''),
             'requirements': request.form.get('requirements', ''),

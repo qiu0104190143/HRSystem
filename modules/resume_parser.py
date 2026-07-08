@@ -76,7 +76,7 @@ def _ai_parse(text):
 
 简历内容：
 ---
-{text[:4000]}
+{text}
 ---"""
 
     try:
@@ -230,15 +230,15 @@ def _extract_info_regex(text):
     }
     lines = text.split('\n')
 
-    # 姓名
-    for line in lines[:5]:
+    # 姓名（放宽匹配：找前8行中2-8字符、不含关键词的行）
+    for line in lines[:8]:
         line = line.strip()
-        if line and len(line) >= 2 and len(line) <= 6 and not any(
-            kw in line for kw in ['简历','个人','联系','电话','邮箱','求职','应聘']
-        ):
-            if re.match(r'^[一-鿿·]{2,6}$', line):
-                info['name'] = line
-                break
+        if line and 2 <= len(line) <= 8:
+            if not any(kw in line for kw in ['简历','个人','联系','电话','邮箱','求职','应聘','姓名','性别','年龄','生日','出生','地址','民族','籍贯','政治']):
+                # 中英文名均可
+                if re.match(r'^[\w一-鿿·.\s]+$', line):
+                    info['name'] = line
+                    break
 
     # 邮箱
     em = re.search(r'[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}', text)
@@ -259,15 +259,17 @@ def _extract_info_regex(text):
             info['age'] = int(m.group(1))
             break
 
-    # 学历
-    for edu in ['博士','博士后','硕士','研究生','本科','学士','大专','中专','高中']:
-        if edu in text[:500]:
-            info['education'] = '硕士' if edu == '研究生' else ('本科' if edu == '学士' else edu)
+    # 学历（取最高学历）
+    edu_found = ''
+    for edu in ['博士后','博士','硕士','研究生','本科','学士','大专','中专','高中']:
+        if edu in text[:800]:
+            edu_found = '硕士' if edu == '研究生' else ('本科' if edu == '学士' else edu)
             break
+    info['education'] = edu_found
 
-    # 学校
-    for p in [r'(?:毕业院校|学校|院校|大学|学院)[：:]\s*([^\n]{2,20})', r'([^\n]{2,20})(?:大学|学院)']:
-        m = re.search(p, text[:500])
+    # 学校（匹配完整校名含大学/学院后缀）
+    for p in [r'(?:毕业院校|学校|院校)[：:]\s*([^\n]{2,30})', r'([^\n]{2,20}(?:大学|学院))']:
+        m = re.search(p, text[:800])
         if m:
             s = m.group(1).strip()
             if len(s) >= 2 and not any(k in s for k in ['联系','电话','邮箱']):

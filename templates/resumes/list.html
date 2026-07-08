@@ -19,33 +19,23 @@
     {% set colors = ['#4f6ef7','#10b981','#8b5cf6','#f59e0b','#f43f5e','#14b8a6'] %}
     {% for resume in resumes %}
     {% set c = colors[resume.id % 6] %}
-    <a href="{{ url_for('resumes.detail_view', resume_id=resume.id) }}" class="resume-card">
+    <div class="resume-card" onclick="location.href='{{ url_for('resumes.detail_view', resume_id=resume.id) }}'">
         <div class="resume-card-top" style="background: linear-gradient(135deg, {{ c }}15, {{ c }}08);">
             <div class="resume-avatar" style="background:{{ c }};color:#fff;">
                 {{ (resume.name or '?')[0] }}
             </div>
-            <div class="resume-card-actions" onclick="event.preventDefault();event.stopPropagation();">
-                <div class="dropdown">
-                    <button class="resume-more-btn" data-bs-toggle="dropdown" title="更多操作">
-                        <i class="bi bi-three-dots"></i>
-                    </button>
-                    <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0" style="border-radius:10px;font-size:13px;">
-                        <li><a class="dropdown-item" href="{{ url_for('resumes.edit_view', resume_id=resume.id) }}"><i class="bi bi-pencil me-2"></i>编辑</a></li>
-                        <li><hr class="dropdown-divider"></li>
-                        <li><a class="dropdown-item text-danger" href="#" onclick="confirmDeleteModal('{{ url_for('resumes.delete_view', resume_id=resume.id) }}', '{{ resume.name or '未命名' }}')"><i class="bi bi-trash me-2"></i>删除</a></li>
-                    </ul>
-                </div>
-            </div>
         </div>
         <div class="resume-card-body">
             <h5 class="resume-card-name">{{ resume.name or '未命名' }}</h5>
-            <p class="resume-card-pos">{{ resume.current_position or '未知职位' }}{{ (' · ' + resume.current_company) if resume.current_company else '' }}</p>
+            {% if resume.current_position or resume.current_company %}
+            <p class="resume-card-pos">{{ resume.current_position or '' }}{{ ' @ ' + resume.current_company if resume.current_company else '' }}</p>
+            {% endif %}
 
             <div class="resume-card-meta">
                 {% if resume.gender %}<span>{{ resume.gender }}</span>{% endif %}
                 {% if resume.age %}<span class="mx-1">·</span><span>{{ resume.age }}岁</span>{% endif %}
-                {% if resume.education %}<span class="mx-1">·</span><span class="fw-bold" style="color:{{ c }};">{{ resume.education }}</span>{% endif %}
-                {% if resume.experience_years %}<span class="mx-1">·</span><span>{{ resume.experience_years }}年经验</span>{% endif %}
+                {% if resume.education %}<span class="mx-1">·</span><span style="color:{{ c }};font-weight:600;">{{ resume.education }}</span>{% endif %}
+                {% if resume.experience_years %}<span class="mx-1">·</span><span>{{ resume.experience_years }}年</span>{% endif %}
             </div>
 
             {% if resume.skills %}
@@ -62,15 +52,11 @@
         </div>
         <div class="resume-card-footer">
             <i class="bi bi-clock"></i> {{ resume.created_at[:10] if resume.created_at else '' }}
-            <span class="ms-auto" style="font-size:11px;color:{{ c }};">
-                {{ resume.file_type | upper if resume.file_type else '' }}
-            </span>
         </div>
-    </a>
+    </div>
     {% endfor %}
 </div>
 
-<!-- 分页 -->
 {% if total_pages > 1 %}
 <div class="pagination-custom">
     <a class="page-link-custom {{ 'disabled opacity-50' if page <= 1 }}" href="?page={{ page-1 }}"><i class="bi bi-chevron-left"></i></a>
